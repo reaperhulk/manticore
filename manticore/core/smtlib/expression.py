@@ -1,6 +1,5 @@
 from functools import reduce
 
-
 class Expression(object):
     ''' Abstract taintable Expression. '''
 

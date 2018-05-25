@@ -2,7 +2,7 @@ import string
 import re
 from . import Manticore
 from .manticore import ManticoreError
-from .core.smtlib import ConstraintSet, Operators, solver, issymbolic, Array, Expression, Constant, operators
+from .core.smtlib import ConstraintSet, Operators, solver, issymbolic, istainted, Array, Expression, Constant, operators
 from .core.smtlib.visitors import arithmetic_simplify, pretty_print
 from .platforms import evm
 from .core.state import State
@@ -86,12 +86,22 @@ class IntegerOverflow(Detector):
         if mnemonic == 'ADD':
             if self._can_add_overflow(state, result, *arguments):
                 self.add_finding(state, "Integer overflow at {} instruction".format(mnemonic))
+                if issymbolic(result):
+                    result._taint = result.taint | frozenset(("IOA",))
         elif mnemonic == 'MUL':
             if self._can_mul_overflow(state, result, *arguments):
                 self.add_finding(state, "Integer overflow at {} instruction".format(mnemonic))
+                if issymbolic(result):
+                    result._taint = result.taint | frozenset(("IOM",))
         elif mnemonic == 'SUB':
             if self._can_sub_underflow(state, *arguments):
                 self.add_finding(state, "Integer underflow at {} instruction".format(mnemonic))
+                if issymbolic(result):
+                    result._taint = result.taint | frozenset(("IU",))
+        if mnemonic == 'SSTORE':
+            for arg in arguments:
+                if istainted(arg, 'IOA') or istainted(arg, 'IOM') or istainted(arg, 'IU'):
+                   self.add_finding(state, "Result of integuer overflowed intruction is written to the storage")
 
 
 class UninitializedMemory(Detector):
@@ -147,6 +157,9 @@ def calculate_coverage(runtime_bytecode, seen):
             count += 1
         total += 1
 
+    if total == 0:
+        #No runtime_bytecode
+        return 0
     return count * 100.0 / total
 
 
@@ -1025,10 +1038,10 @@ class ManticoreEVM(Manticore):
         return status
 
     def multi_tx_analysis(self, solidity_filename, contract_name=None, tx_limit=None, tx_use_coverage=True, tx_account="attacker"):
+        attacker_account = self.create_account(balance=1000)
         owner_account = self.create_account(balance=1000)
         with open(solidity_filename) as f:
             contract_account = self.solidity_create_contract(f, contract_name=contract_name, owner=owner_account)
-        attacker_account = self.create_account(balance=1000)
 
         if tx_account == "attacker":
             tx_account = attacker_account
@@ -1270,7 +1283,10 @@ class ManticoreEVM(Manticore):
         with testcase.open_stream('summary') as summary:
             summary.write("Last exception: %s\n" % state.context['last_exception'])
 
-            address, offset = state.context['seth.rt.trace'][-1]
+            if 'seth.rt.trace' in state.context:
+                address, offset = state.context['seth.rt.trace'][-1]
+            else:
+                address, offset = state.context['seth.init.trace'][-1]
 
             # Last instruction
             metadata = self.get_metadata(blockchain.transactions[-1].address)
@@ -1398,7 +1414,7 @@ class ManticoreEVM(Manticore):
                 statef.write(iterpickle.dumps(state, 2))
 
         with testcase.open_stream('rt.trace') as f:
-            self._emit_trace_file(f, state.context['seth.rt.trace'])
+            self._emit_trace_file(f, state.context.get('seth.rt.trace',()))
 
         with testcase.open_stream('init.trace') as f:
             self._emit_trace_file(f, state.context['seth.init.trace'])
@@ -1424,7 +1440,7 @@ class ManticoreEVM(Manticore):
         #global summary
         with self._output.save_stream('global.summary') as global_summary:
             # (accounts created by contract code are not in this list )
-            global_summary.write("Global coverage:\n")
+            global_summary.write("Global runtime coverage:\n")
             for address in self.contract_accounts:
                 global_summary.write("%x: %d%%\n" % (address, self.global_coverage(address)))  # coverage % for address in this state
 
@@ -1547,13 +1563,16 @@ class ManticoreEVM(Manticore):
         world = None
         for state_id in self.all_state_ids:
             world = self.get_world(state_id)
-            if account_address in world.contract_accounts:
+            runtime_bytecode = world.get_code(account_address)
+            #Some world with runtime bytcode set found
+            if len(runtime_bytecode):
                 break
 
         with self.locked_context('runtime_coverage') as coverage:
-            seen = coverage
-
-        runtime_bytecode = world.get_code(account_address)
+            seen = set()
+            for addr, off in coverage:
+                if addr == account_address:
+                    seen.add(off)
         return calculate_coverage(runtime_bytecode, seen)
 
     # TODO: Find a better way to suppress execution of Manticore._did_finish_run_callback
