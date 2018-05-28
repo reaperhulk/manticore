@@ -1,3 +1,4 @@
+from __future__ import division
 import six
 from six.moves import StringIO, range
 import binascii
@@ -1851,7 +1852,7 @@ class Linux(Platform):
         assert flags == 0x51  # TODO: fix
         self.current.GS = 0x63
         self.current.set_descriptor(self.current.GS, pointer, 0x4000, 'rw')
-        self.current.write_int(user_info, (0x63 - 3) / 8, 32)
+        self.current.write_int(user_info, (0x63 - 3) // 8, 32)
         return 0
 
     def sys_getpriority(self, which, who):
@@ -2253,7 +2254,7 @@ class Linux(Platform):
 
         # From linux/arch/x86/include/uapi/asm/stat.h
         # Numerous fields are native width-wide
-        nw = self.current.address_bit_size / 8
+        nw = self.current.address_bit_size // 8
 
         bufstat = add(nw, stat.st_dev)     # long st_dev
         bufstat += add(nw, stat.st_ino)     # long st_ino

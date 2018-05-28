@@ -1,3 +1,4 @@
+from __future__ import division
 import collections
 import logging
 import six
@@ -734,7 +735,7 @@ class X86Cpu(Cpu):
         :param size: the size of the value.
         '''
         assert size in (8, 16, cpu.address_bit_size)
-        cpu.STACK = cpu.STACK - size / 8
+        cpu.STACK = cpu.STACK - size // 8
         base, _, _ = cpu.get_descriptor(cpu.read_register('SS'))
         address = cpu.STACK + base
         cpu.write_int(address, value, size)
@@ -751,7 +752,7 @@ class X86Cpu(Cpu):
         base, _, _ = cpu.get_descriptor(cpu.SS)
         address = cpu.STACK + base
         value = cpu.read_int(address, size)
-        cpu.STACK = cpu.STACK + size / 8
+        cpu.STACK = cpu.STACK + size // 8
         return value
 
     ################################################
@@ -1380,10 +1381,10 @@ class X86Cpu(Cpu):
                             arg_dest)
         )
 
-        cpu.write_register(cmp_reg_name_l, Operators.ITEBV(size / 2, cpu.ZF, cmpl,
-                                                           Operators.EXTRACT(arg_dest, 0, size / 2)))
-        cpu.write_register(cmp_reg_name_h, Operators.ITEBV(size / 2, cpu.ZF, cmph,
-                                                           Operators.EXTRACT(arg_dest, size / 2, size / 2)))
+        cpu.write_register(cmp_reg_name_l, Operators.ITEBV(size // 2, cpu.ZF, cmpl,
+                                                           Operators.EXTRACT(arg_dest, 0, size // 2)))
+        cpu.write_register(cmp_reg_name_h, Operators.ITEBV(size // 2, cpu.ZF, cmph,
+                                                           Operators.EXTRACT(arg_dest, size // 2, size // 2)))
 
     @instruction
     def DAA(cpu):
@@ -3008,7 +3009,7 @@ class X86Cpu(Cpu):
         # http://stackoverflow.com/questions/11291151/how-push-imm-encodes
         size = src.size
         v = src.read()
-        if size != 64 and size != cpu.address_bit_size / 2:
+        if size != 64 and size != cpu.address_bit_size // 2:
             v = Operators.SEXTEND(v, size, cpu.address_bit_size)
             size = cpu.address_bit_size
         cpu.push(v, size)
@@ -3965,7 +3966,7 @@ class X86Cpu(Cpu):
         addr = bitbase.address()
         offt = Operators.SEXTEND(bitoffset.read(), bitoffset.size, bitbase.size)
         offt_is_neg = offt >= (1 << (bitbase.size - 1))
-        offt_in_bytes = offt / 8
+        offt_in_bytes = offt // 8
         bitpos = offt % 8
 
         new_addr = addr + Operators.ITEBV(bitbase.size, offt_is_neg, -offt_in_bytes, offt_in_bytes)
@@ -4323,7 +4324,7 @@ class X86Cpu(Cpu):
         cpu._calculate_CMP_flags(size, res, arg0, arg1)
 
         # Advance EDI/ESI pointers
-        increment = Operators.ITEBV(cpu.address_bit_size, cpu.DF, -size / 8, size / 8)
+        increment = Operators.ITEBV(cpu.address_bit_size, cpu.DF, -size // 8, size // 8)
         cpu.write_register(src_reg, cpu.read_register(src_reg) + increment)
         cpu.write_register(dest_reg, cpu.read_register(dest_reg) + increment)
 
@@ -4354,7 +4355,7 @@ class X86Cpu(Cpu):
         arg0 = cpu.read_int(src_addr, size)
         dest.write(arg0)
 
-        increment = Operators.ITEBV(cpu.address_bit_size, cpu.DF, -size / 8, size / 8)
+        increment = Operators.ITEBV(cpu.address_bit_size, cpu.DF, -size // 8, size // 8)
         cpu.write_register(src_reg, cpu.read_register(src_reg) + increment)
 
     @rep
@@ -4385,7 +4386,7 @@ class X86Cpu(Cpu):
         dest.write(src.read())
 
         # Advance EDI/ESI pointers
-        increment = Operators.ITEBV(cpu.address_bit_size, cpu.DF, -size / 8, size / 8)
+        increment = Operators.ITEBV(cpu.address_bit_size, cpu.DF, -size // 8, size // 8)
         cpu.write_register(src_reg, cpu.read_register(src_reg) + increment)
         cpu.write_register(dest_reg, cpu.read_register(dest_reg) + increment)
 
@@ -4440,7 +4441,7 @@ class X86Cpu(Cpu):
         res = arg0 - arg1
         cpu._calculate_CMP_flags(size, res, arg0, arg1)
 
-        increment = Operators.ITEBV(cpu.address_bit_size, cpu.DF, -size / 8, size / 8)
+        increment = Operators.ITEBV(cpu.address_bit_size, cpu.DF, -size // 8, size // 8)
         cpu.write_register(mem_reg, cpu.read_register(mem_reg) + increment)
 
     @rep
@@ -4462,7 +4463,7 @@ class X86Cpu(Cpu):
         size = src.size
         dest.write(src.read())
         dest_reg = dest.mem.base
-        increment = Operators.ITEBV({'RDI': 64, 'EDI': 32, 'DI': 16}[dest_reg], cpu.DF, -size / 8, size / 8)
+        increment = Operators.ITEBV({'RDI': 64, 'EDI': 32, 'DI': 16}[dest_reg], cpu.DF, -size // 8, size // 8)
         cpu.write_register(dest_reg, cpu.read_register(dest_reg) + increment)
 
 
@@ -4636,7 +4637,7 @@ class X86Cpu(Cpu):
         mask = (1 << item_size) - 1
         res = 0
         count = 0
-        for pos in range(0, size / item_size):
+        for pos in range(0, size // item_size):
             if count >= size:
                 break
             item0 = Operators.ZEXTEND((dest_value >> (pos * item_size)) & mask, size)
@@ -4659,7 +4660,7 @@ class X86Cpu(Cpu):
         mask = (1 << item_size) - 1
         res = 0
         count = 0
-        for pos in reversed(range(0, size / item_size)):
+        for pos in reversed(range(0, size // item_size)):
             if count >= size:
                 break
             item0 = Operators.ZEXTEND((dest_value >> (pos * item_size)) & mask, size)
@@ -4928,9 +4929,9 @@ class X86Cpu(Cpu):
                 tres >>= 1
             return oecx
         else:
-            oecx = 128 / stepsize - 1
+            oecx = 128 // stepsize - 1
             tres = res
-            msbmask = (1 << (128 / stepsize - 1))
+            msbmask = (1 << (128 // stepsize - 1))
             while ((tres & msbmask) == 0):
                 oecx -= 1
                 tres = (tres << 1) & ((msbmask << 1) - 1)
@@ -4970,8 +4971,8 @@ class X86Cpu(Cpu):
             val = Operators.NOT(reg - 1)
         else:
             val = reg
-        if (val > 128 / step):
-            val = 128 / step
+        if (val > 128 // step):
+            val = 128 // step
         result = []
         for i in range(val):
             uc = Operators.EXTRACT(arg, i * step, step)
@@ -5003,18 +5004,18 @@ class X86Cpu(Cpu):
         elif (Operators.EXTRACT(ctlbyte, 2, 2) == 2):
             #raise NotImplementedError("pcmpistrx Equal each")
             # Equal Each requires Null Byte Comparison Here
-            while len(needle) < xmmsize / stepsize:
+            while len(needle) < xmmsize // stepsize:
                 needle.append('\x00')
-            while len(haystack) < xmmsize / stepsize:
+            while len(haystack) < xmmsize // stepsize:
                 haystack.append('\x00')
-            for i in range(xmmsize / stepsize):
+            for i in range(xmmsize // stepsize):
                 res = Operators.ITEBV(xmmsize, needle[i] == haystack[i], res | (1 << i), res)
         elif (Operators.EXTRACT(ctlbyte, 2, 2) == 3):
             #raise NotImplementedError("pcmpistrx Equal ordered")
             if len(haystack) < len(needle):
                 return 0
             for i in range(len(haystack)):
-                subneedle = needle[: (xmmsize / stepsize - i) if len(needle) + i > xmmsize / stepsize else len(needle)]
+                subneedle = needle[: (xmmsize // stepsize - i) if len(needle) + i > xmmsize // stepsize else len(needle)]
                 res = Operators.ITEBV(xmmsize, haystack[i:i + len(subneedle)] == subneedle, res | (1 << i), res)
         return res
 
@@ -5024,7 +5025,7 @@ class X86Cpu(Cpu):
         if (Operators.EXTRACT(ctlbyte, 4, 2) == 0):
             res2 = res1
         if (Operators.EXTRACT(ctlbyte, 4, 2) == 1):
-            res2 = ((1 << (128 / stepsize)) - 1) ^ res1
+            res2 = ((1 << (128 // stepsize)) - 1) ^ res1
         if (Operators.EXTRACT(ctlbyte, 4, 2) == 2):
             res2 = res1
         if (Operators.EXTRACT(ctlbyte, 4, 2) == 3):
@@ -5033,8 +5034,8 @@ class X86Cpu(Cpu):
 
     def _pcmpxstrx_setflags(self, res, varg0, varg1, ctlbyte):
         stepsize = self._pcmpxstrx_srcdat_format(ctlbyte)
-        self.ZF = len(varg1) < 128 / stepsize
-        self.SF = len(varg0) < 128 / stepsize
+        self.ZF = len(varg1) < 128 // stepsize
+        self.SF = len(varg0) < 128 // stepsize
         self.CF = res != 0
         self.OF = res & 1
         self.AF = False
@@ -5066,7 +5067,7 @@ class X86Cpu(Cpu):
         res = cpu._pcmpxstrx_aggregation_operation(varg0, varg1, ctlbyte)
         res = cpu._pcmpxstrx_polarity(res, ctlbyte, len(varg1))
         if (res == 0):
-            cpu.ECX = 128 / cpu._pcmpxstrx_srcdat_format(ctlbyte)
+            cpu.ECX = 128 // cpu._pcmpxstrx_srcdat_format(ctlbyte)
         else:
             cpu.ECX = cpu._pcmpxstri_output_selection(ctlbyte, res)
         cpu._pcmpxstrx_setflags(res, varg0, varg1, ctlbyte)
@@ -5089,7 +5090,7 @@ class X86Cpu(Cpu):
         res = cpu._pcmpxstrx_aggregation_operation(varg0, varg1, ctlbyte)
         res = cpu._pcmpxstrx_polarity(res, ctlbyte, len(varg1))
         if (res == 0):
-            cpu.ECX = 128 / cpu._pcmpxstrx_srcdat_format(ctlbyte)
+            cpu.ECX = 128 // cpu._pcmpxstrx_srcdat_format(ctlbyte)
         else:
             cpu.ECX = cpu._pcmpxstri_output_selection(ctlbyte, res)
         cpu._pcmpxstrx_setflags(res, varg0, varg1, ctlbyte)
@@ -5960,7 +5961,7 @@ class I386CdeclAbi(Abi):
     '''
 
     def get_arguments(self):
-        base = self._cpu.STACK + self._cpu.address_bit_size / 8
+        base = self._cpu.STACK + self._cpu.address_bit_size // 8
         for address in self.values_from(base):
             yield address
 
@@ -5981,7 +5982,7 @@ class I386StdcallAbi(Abi):
         self._arguments = 0
 
     def get_arguments(self):
-        base = self._cpu.STACK + self._cpu.address_bit_size / 8
+        base = self._cpu.STACK + self._cpu.address_bit_size // 8
         for address in self.values_from(base):
             self._arguments += 1
             yield address
@@ -5992,7 +5993,7 @@ class I386StdcallAbi(Abi):
     def ret(self):
         self._cpu.EIP = self._cpu.pop(self._cpu.address_bit_size)
 
-        word_bytes = self._cpu.address_bit_size / 8
+        word_bytes = self._cpu.address_bit_size // 8
         self._cpu.ESP += self._arguments * word_bytes
         self._arguments = 0
 
@@ -6012,7 +6013,7 @@ class SystemVAbi(Abi):
         for reg in reg_args:
             yield reg
 
-        word_bytes = self._cpu.address_bit_size / 8
+        word_bytes = self._cpu.address_bit_size // 8
         for address in self.values_from(self._cpu.RSP + word_bytes):
             yield address
 

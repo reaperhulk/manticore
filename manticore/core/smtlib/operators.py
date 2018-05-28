@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, division
 from .expression import *
 from ...utils.helpers import issymbolic, istainted
 import math
@@ -24,9 +24,11 @@ def CHR(s):
         else:
             return BitVecExtract(s, 0, 8)
     elif isinstance(s, six.integer_types):
-        return chr(s & 0xff)
+        return six.int2byte(s & 0xff)
     else:
         assert len(s) == 1
+        # TODO: what the hell takes this path
+        import pdb;pdb.set_trace()
         return s
 
 
@@ -150,7 +152,7 @@ def ZEXTEND(x, size):
 
 
 def CONCAT(total_size, *args):
-    arg_size = total_size / len(args)
+    arg_size = total_size // len(args)
     if any(issymbolic(x) for x in args):
         if len(args) > 1:
             def cast(x):

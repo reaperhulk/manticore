@@ -1,3 +1,4 @@
+from __future__ import division
 import copy
 import logging
 import six
@@ -281,8 +282,8 @@ class State(Eventful):
             m, M = self._solver.minmax(self._constraints, symbolic)
             vals += [m, M]
             if M - m > 3:
-                if self._solver.can_be_true(self._constraints, symbolic == (m + M) / 2):
-                    vals.append((m + M) / 2)
+                if self._solver.can_be_true(self._constraints, symbolic == (m + M) // 2):
+                    vals.append((m + M) // 2)
             if M - m > 100:
                 vals += self._solver.get_all_values(self._constraints, symbolic,
                                                     maxcnt=maxcount, silent=True)

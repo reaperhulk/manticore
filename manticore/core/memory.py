@@ -1,3 +1,4 @@
+from __future__ import division
 from abc import ABCMeta, abstractmethod, abstractproperty
 from weakref import WeakValueDictionary
 from .smtlib import *
@@ -251,13 +252,19 @@ class AnonMap(Map):
         assert not isinstance(index, slice) or \
             len(value) == index.stop - index.start
         index = self._get_offset(index)
-        self._data[index] = value
+        # TODO: this would be faster if we declared a python-version-specific
+        # __setitem__ at import
+        if six.PY2:
+            self._data[index] = value
+        else:
+            assert len(value) == 1
+            self._data[index] = value[0].encode('utf8')
 
     def __getitem__(self, index):
         index = self._get_offset(index)
         if isinstance(index, slice):
-            return map(chr, self._data[index])
-        return chr(self._data[index])
+            return list(map(six.int2byte, self._data[index]))
+        return six.int2byte(self._data[index])
 
 
 class FileMap(Map):
@@ -527,7 +534,7 @@ class Memory(object):
             if consecutive_free >= size:
                 return p << self.page_bit_size
             counter += 1
-            if counter >= self.memory_size / self.page_size:
+            if counter >= self.memory_size // self.page_size:
                 raise MemoryException('Not enough memory')
 
         return self._search(size, self.memory_size - size, counter)
@@ -978,9 +985,9 @@ class SMemory(Memory):
                     else:
                         result.append(byte)
                     assert len(result) == offset + 1
-            return map(Operators.CHR, result)
+            return list(map(Operators.CHR, result))
         else:
-            result = map(Operators.ORD, super(SMemory, self).read(address, size, force))
+            result = list(map(Operators.ORD, super(SMemory, self).read(address, size, force)))
             for offset in range(size):
                 if address + offset in self._symbols:
                     for condition, value in self._symbols[address + offset]:
@@ -988,7 +995,7 @@ class SMemory(Memory):
                             result[offset] = Operators.ORD(value)
                         else:
                             result[offset] = Operators.ITEBV(8, condition, Operators.ORD(value), result[offset])
-            return map(Operators.CHR, result)
+            return list(map(Operators.CHR, result))
 
     def write(self, address, value, force=False):
         '''

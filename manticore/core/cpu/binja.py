@@ -1,3 +1,4 @@
+from __future__ import division
 import ctypes
 import logging
 import os
@@ -608,7 +609,7 @@ class BinjaCpu(Cpu):
         :param value: the value to put in the stack.
         :param size: the size of the value.
         '''
-        cpu.STACK -= size / 8
+        cpu.STACK -= size // 8
         base, _, _ = cpu.get_descriptor(cpu.ss)
         address = cpu.STACK + base
         cpu.write_int(address, value, size)
@@ -624,7 +625,7 @@ class BinjaCpu(Cpu):
         base, _, _ = cpu.get_descriptor(cpu.ss)
         address = cpu.STACK + base
         value = cpu.read_int(address, size)
-        cpu.STACK += size / 8
+        cpu.STACK += size // 8
         return value
 
     def ADC(cpu, left, right):

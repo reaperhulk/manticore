@@ -1,3 +1,4 @@
+from __future__ import division
 import inspect
 import logging
 from six.moves import cStringIO as StringIO, range
@@ -287,7 +288,7 @@ class Abi(object):
         A reusable generator for increasing pointer-sized values from an address
         (usually the stack).
         '''
-        word_bytes = self._cpu.address_bit_size / 8
+        word_bytes = self._cpu.address_bit_size // 8
         while True:
             yield base
             base += word_bytes
@@ -607,7 +608,7 @@ class Cpu(Eventful):
         assert size in SANE_SIZES
         self._publish('will_read_memory', where, size)
 
-        data = self._memory.read(where, size / 8, force)
+        data = self._memory.read(where, size // 8, force)
         assert (8 * len(data)) == size
         value = Operators.CONCAT(size, *map(Operators.ORD, reversed(data)))
 
@@ -716,7 +717,7 @@ class Cpu(Eventful):
         :param force: whether to ignore memory permissions
         :return: New stack pointer
         '''
-        self.STACK -= self.address_bit_size / 8
+        self.STACK -= self.address_bit_size // 8
         self.write_int(self.STACK, value, force=force)
         return self.STACK
 
@@ -728,7 +729,7 @@ class Cpu(Eventful):
         :return: Value read
         '''
         value = self.read_int(self.STACK, force=force)
-        self.STACK += self.address_bit_size / 8
+        self.STACK += self.address_bit_size // 8
         return value
 
     #######################################
@@ -752,7 +753,7 @@ class Cpu(Eventful):
         if pc in self._instruction_cache:
             return self._instruction_cache[pc]
 
-        text = ''
+        text = b''
         # Read Instruction from memory
         for address in range(pc, pc + self.max_instr_width):
             # This reads a byte from memory ignoring permissions
@@ -765,7 +766,7 @@ class Cpu(Eventful):
             if issymbolic(c):
                 assert isinstance(c, BitVec) and c.size == 8
                 if isinstance(c, Constant):
-                    c = chr(c.value)
+                    c = chr(c.value).encode('ascii')
                 else:
                     logger.error('Concretize executable memory %r %r', c, text)
                     raise ConcretizeMemory(self.memory,
@@ -776,7 +777,7 @@ class Cpu(Eventful):
 
         # Pad potentially incomplete instruction with zeroes
 
-        code = text.ljust(self.max_instr_width, '\x00')
+        code = text.ljust(self.max_instr_width, b'\x00')
 
         try:
             # decode the instruction from code

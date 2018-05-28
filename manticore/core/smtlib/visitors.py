@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, division
 from .expression import *
 try:
     from functools import lru_cache
@@ -639,7 +639,7 @@ class TranslatorSmtlib(Visitor):
         if expression.size == 1:
             return '#' + bin(expression.value & expression.mask)[1:]
         else:
-            return '#x%0*x' % (int(expression.size / 4), expression.value & expression.mask)
+            return '#x%0*x' % (int(expression.size // 4), expression.value & expression.mask)
 
     def visit_BoolConstant(self, expression):
         return expression.value and 'true' or 'false'

@@ -1,3 +1,4 @@
+from __future__ import division
 from functools import wraps
 import logging
 import struct
@@ -40,7 +41,7 @@ def instruction(body):
             if issymbolic(should_execute):
                 # Let's remember next time we get here we should not do this again
                 cpu._at_symbolic_conditional = True
-                i_size = cpu.address_bit_size / 8
+                i_size = cpu.address_bit_size // 8
                 cpu.PC = Operators.ITEBV(cpu.address_bit_size, should_execute, cpu.PC - i_size,
                                          cpu.PC)
                 return
@@ -481,11 +482,11 @@ class Armv7Cpu(Cpu):
     # TODO add to abstract cpu, and potentially remove stacksub/add from it?
     def stack_push(self, data, nbytes=None):
         if isinstance(data, six.integer_types):
-            nbytes = nbytes or self.address_bit_size / 8
+            nbytes = nbytes or self.address_bit_size // 8
             self.SP -= nbytes
             self.write_int(self.SP, data, nbytes * 8)
         elif isinstance(data, BitVec):
-            self.SP -= data.size / 8
+            self.SP -= data.size // 8
             self.write_int(self.SP, data, data.size)
         elif isinstance(data, str):
             self.SP -= len(data)
@@ -974,7 +975,7 @@ class Armv7Cpu(Cpu):
     @instruction
     def POP(cpu, *regs):
         for reg in regs:
-            val = cpu.stack_pop(cpu.address_bit_size / 8)
+            val = cpu.stack_pop(cpu.address_bit_size // 8)
             if reg.reg in ('PC', 'R15'):
                 cpu._set_mode_by_val(val)
                 val = val & ~0x1
@@ -1024,14 +1025,14 @@ class Armv7Cpu(Cpu):
         """
         address = base.read()
         if insn_id == cs.arm.ARM_INS_LDMIB:
-            address += cpu.address_bit_size / 8
+            address += cpu.address_bit_size // 8
 
         for reg in regs:
             reg.write(cpu.read_int(address, cpu.address_bit_size))
-            address += reg.size / 8
+            address += reg.size // 8
 
         if insn_id == cs.arm.ARM_INS_LDMIB:
-            address -= reg.size / 8
+            address -= reg.size // 8
 
         if cpu.instruction.writeback:
             base.writeback(address)
@@ -1226,7 +1227,7 @@ class Armv7Cpu(Cpu):
     def _VSTM(cpu, address, *regs):
         for reg in regs:
             cpu.write_int(address, reg.read(), reg.size)
-            address += reg.size / 8
+            address += reg.size // 8
 
         return address
 
@@ -1238,7 +1239,7 @@ class Armv7Cpu(Cpu):
 
     @instruction
     def VSTMDB(cpu, base, *regs):
-        address = base.read() - (cpu.address_bit_size / 8) * len(regs)
+        address = base.read() - (cpu.address_bit_size // 8) * len(regs)
         updated_address = cpu._VSTM(address, *regs)
         if cpu.instruction.writeback:
             base.writeback(updated_address)
