@@ -1,6 +1,7 @@
 import collections
 import logging
 import six
+from six.moves import range
 
 from functools import wraps
 
@@ -2093,7 +2094,7 @@ class X86Cpu(Cpu):
         '''
         parts = []
         arg0 = dest.read()
-        for i in xrange(0, dest.size, 8):
+        for i in range(0, dest.size, 8):
             parts.append(Operators.EXTRACT(arg0, i, 8))
 
         dest.write(Operators.CONCAT(8 * len(parts), *parts))
@@ -2575,7 +2576,7 @@ class X86Cpu(Cpu):
         size = dest.size
         arg0 = dest.read()
         temp = 0
-        for pos in xrange(0, size, 8):
+        for pos in range(0, size, 8):
             temp = (temp << 8) | (arg0 & 0xff)
             arg0 = arg0 >> 8
         dest.write(arg0)
@@ -4004,7 +4005,7 @@ class X86Cpu(Cpu):
         value = src.read()
         flag = Operators.EXTRACT(value, 0, 1) == 1
         res = 0
-        for pos in xrange(1, src.size):
+        for pos in range(1, src.size):
             res = Operators.ITEBV(dest.size, flag, res, pos)
             flag = Operators.OR(flag, Operators.EXTRACT(value, pos, 1) == 1)
 
@@ -4046,7 +4047,7 @@ class X86Cpu(Cpu):
         flag = Operators.EXTRACT(value, src.size - 1, 1) == 1
         res = 0
 
-        for pos in reversed(xrange(0, src.size)):
+        for pos in reversed(range(0, src.size)):
             res = Operators.ITEBV(dest.size, flag, res, pos)
             flag = Operators.OR(flag, (Operators.EXTRACT(value, pos, 1) == 1))
 
@@ -4635,7 +4636,7 @@ class X86Cpu(Cpu):
         mask = (1 << item_size) - 1
         res = 0
         count = 0
-        for pos in xrange(0, size / item_size):
+        for pos in range(0, size / item_size):
             if count >= size:
                 break
             item0 = Operators.ZEXTEND((dest_value >> (pos * item_size)) & mask, size)
@@ -4658,7 +4659,7 @@ class X86Cpu(Cpu):
         mask = (1 << item_size) - 1
         res = 0
         count = 0
-        for pos in reversed(xrange(0, size / item_size)):
+        for pos in reversed(range(0, size / item_size)):
             if count >= size:
                 break
             item0 = Operators.ZEXTEND((dest_value >> (pos * item_size)) & mask, size)
@@ -4882,7 +4883,7 @@ class X86Cpu(Cpu):
         arg1 = op1.read()
         res = 0
 
-        for i in xrange(0, op0.size, 8):
+        for i in range(0, op0.size, 8):
             res = Operators.ITEBV(op0.size, Operators.EXTRACT(arg0, i, 8) == Operators.EXTRACT(arg1, i, 8), res | (0xff << i), res)
             # if (arg0>>i)&0xff == (arg1>>i)&0xff:
             #    res = res | (0xff << i)
@@ -5121,7 +5122,7 @@ class X86Cpu(Cpu):
         arg1 = op1.read()
 
         res = 0
-        for i in reversed(xrange(7, op1.size, 8)):
+        for i in reversed(range(7, op1.size, 8)):
             res = (res << 1) | ((arg1 >> i) & 1)
         op0.write(Operators.EXTRACT(res, 0, op0.size))
 
@@ -5849,7 +5850,7 @@ class X86Cpu(Cpu):
         value = src.read()
         flag = Operators.EXTRACT(value, 0, 1) == 1
         res = 0
-        for pos in xrange(1, src.size):
+        for pos in range(1, src.size):
             res = Operators.ITEBV(dest.size, flag, res, pos)
             flag = Operators.OR(flag, Operators.EXTRACT(value, pos, 1) == 1)
 

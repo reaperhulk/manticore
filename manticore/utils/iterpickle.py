@@ -33,6 +33,7 @@ import marshal
 import sys
 import struct
 import re
+from six.moves import range
 
 __all__ = ["PickleError", "PicklingError", "UnpicklingError", "Pickler",
            "Unpickler", "dump", "dumps", "load", "loads"]
@@ -634,7 +635,7 @@ class Pickler:
                 write(APPEND)
             return
 
-        r = xrange(self._BATCHSIZE)
+        r = range(self._BATCHSIZE)
         while items is not None:
             tmp = []
             for i in r:
@@ -682,7 +683,7 @@ class Pickler:
                 write(SETITEM)
             return
 
-        r = xrange(self._BATCHSIZE)
+        r = range(self._BATCHSIZE)
         while items is not None:
             tmp = []
             for i in r:

@@ -14,6 +14,7 @@ from ..core.state import Concretize, TerminateState
 import logging
 import sys
 import six
+from six.moves import range
 from collections import namedtuple
 if sys.version_info < (3, 6):
     import sha3
@@ -313,7 +314,7 @@ class EVMAsm(object):
             ''' Encoded instruction '''
             bytes = []
             bytes.append(chr(self._opcode))
-            for offset in reversed(xrange(self.operand_size)):
+            for offset in reversed(range(self.operand_size)):
                 c = (self.operand >> offset * 8) & 0xff
                 bytes.append(chr(c))
             return ''.join(bytes)
@@ -2038,7 +2039,7 @@ class EVM(Eventful):
         def hexdump(src, length=16):
             FILTER = ''.join([(len(repr(chr(x))) == 3) and chr(x) or '.' for x in range(256)])
             lines = []
-            for c in xrange(0, len(src), length):
+            for c in range(0, len(src), length):
                 chars = src[c:c + length]
 
                 def p(x):

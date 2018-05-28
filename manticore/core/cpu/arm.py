@@ -5,6 +5,7 @@ import struct
 import capstone as cs
 
 import six
+from six.moves import range
 
 from .abstractcpu import Abi, Cpu, Interruption, Operand, RegisterFile, SyscallAbi
 from .abstractcpu import instruction as abstract_instruction
@@ -993,7 +994,7 @@ class Armv7Cpu(Cpu):
         msb = cpu.address_bit_size - 1
         result = 32
 
-        for pos in xrange(cpu.address_bit_size):
+        for pos in range(cpu.address_bit_size):
             cond = Operators.EXTRACT(value, pos, 1) == 1
             result = Operators.ITEBV(cpu.address_bit_size, cond, msb - pos, result)
 

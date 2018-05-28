@@ -6,6 +6,7 @@ except:
     from functools32 import lru_cache
 import logging
 import operator
+from six.moves import range
 logger = logging.getLogger(__name__)
 
 
@@ -94,7 +95,7 @@ class Visitor(object):
                 self.push(cache[node])
             elif isinstance(node, Operation):
                 if node in visited:
-                    operands = [self.pop() for _ in xrange(len(node.operands))]
+                    operands = [self.pop() for _ in range(len(node.operands))]
                     if use_fixed_point:
                         new_node = self._rebuild(node, operands)
                         value = self._method(new_node, *operands)
@@ -319,7 +320,7 @@ class ConstantFolderSimplifier(Visitor):
                 isinstance(expression, Bool)
                 return BoolConstant(value, taint=expression.taint)
         else:
-            if any(operands[i] is not expression.operands[i] for i in xrange(len(operands))):
+            if any(operands[i] is not expression.operands[i] for i in range(len(operands))):
                 expression = self._rebuild(expression, operands)
         return expression
 

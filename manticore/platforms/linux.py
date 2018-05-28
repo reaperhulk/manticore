@@ -1,5 +1,5 @@
 import six
-from six.moves import StringIO
+from six.moves import StringIO, range
 import binascii
 import errno
 import fcntl
@@ -276,7 +276,7 @@ class SymbolicFile(File):
             return []
         else:
             size = min(count, self.max_size - self.pos)
-            ret = [self.array[i] for i in xrange(self.pos, self.pos + size)]
+            ret = [self.array[i] for i in range(self.pos, self.pos + size)]
             self.pos += size
             return ret
 
@@ -285,7 +285,7 @@ class SymbolicFile(File):
         Writes the symbolic bytes in C{data} onto the file.
         '''
         size = min(len(data), self.max_size - self.pos)
-        for i in xrange(self.pos, self.pos + size):
+        for i in range(self.pos, self.pos + size):
             self.array[i] = data[i - self.pos]
 
 
@@ -343,7 +343,7 @@ class Socket(object):
     def receive(self, size):
         rx_bytes = min(size, len(self.buffer))
         ret = []
-        for i in xrange(rx_bytes):
+        for i in range(rx_bytes):
             ret.append(self.buffer.pop())
         return ret
 
@@ -497,8 +497,8 @@ class Linux(Platform):
         # Each process can wait for one timeout
         self.timers = [None] * nprocs
         # each fd has a waitlist
-        self.rwait = [set() for _ in xrange(nfiles)]
-        self.twait = [set() for _ in xrange(nfiles)]
+        self.rwait = [set() for _ in range(nfiles)]
+        self.twait = [set() for _ in range(nfiles)]
 
         # Install event forwarders
         for proc in self.procs:
@@ -1318,7 +1318,7 @@ class Linux(Platform):
             - C{-1} if the calling process can not access the file in the desired mode.
         '''
         filename = ""
-        for i in xrange(0, 255):
+        for i in range(0, 255):
             c = Operators.CHR(self.current.read_int(buf + i, 8))
             if c == '\x00':
                 break
@@ -1791,7 +1791,7 @@ class Linux(Platform):
         ptrsize = cpu.address_bit_size
         sizeof_iovec = 2 * (ptrsize // 8)
         total = 0
-        for i in xrange(0, count):
+        for i in range(0, count):
             buf = cpu.read_int(iov + i * sizeof_iovec, ptrsize)
             size = cpu.read_int(iov + i * sizeof_iovec + (sizeof_iovec // 2),
                                 ptrsize)
@@ -1822,12 +1822,12 @@ class Linux(Platform):
             logger.error("writev: Not a valid file descriptor ({})".format(fd))
             return -e.err
 
-        for i in xrange(0, count):
+        for i in range(0, count):
             buf = cpu.read_int(iov + i * sizeof_iovec, ptrsize)
             size = cpu.read_int(iov + i * sizeof_iovec + (sizeof_iovec // 2), ptrsize)
 
             data = ""
-            for j in xrange(0, size):
+            for j in range(0, size):
                 data += Operators.CHR(cpu.read_int(buf + j, 8))
             data = self._transform_write_data(data)
             write_fd.write(data)

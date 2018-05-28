@@ -4,6 +4,7 @@ import fcntl
 import resource
 import gc
 import sys
+from six.moves import range
 #logging.basicConfig(filename = "test.log",
 #                format = "%(asctime)s: %(name)s:%(levelname)s: %(message)s",
 #                level = logging.DEBUG)
@@ -488,7 +489,7 @@ class ExpressionTest(unittest.TestCase):
 
     def test_SAR(self):
         A = 0xbadf00d
-        for B in xrange(32):
+        for B in range(32):
             cs = ConstraintSet()
             a = cs.new_bitvec(32)
             b = cs.new_bitvec(32)

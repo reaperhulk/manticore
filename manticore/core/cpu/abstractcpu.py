@@ -1,6 +1,6 @@
 import inspect
 import logging
-from six.moves import cStringIO as StringIO
+from six.moves import cStringIO as StringIO, range
 import string
 
 from functools import wraps
@@ -587,7 +587,7 @@ class Cpu(Eventful):
         assert size in SANE_SIZES
         self._publish('will_write_memory', where, expression, size)
 
-        data = [Operators.CHR(Operators.EXTRACT(expression, offset, 8)) for offset in xrange(0, size, 8)]
+        data = [Operators.CHR(Operators.EXTRACT(expression, offset, 8)) for offset in range(0, size, 8)]
         self._memory.write(where, data, force)
 
         self._publish('did_write_memory', where, expression, size)
@@ -623,7 +623,7 @@ class Cpu(Eventful):
         :type data: str or list
         :param force: whether to ignore memory permissions
         '''
-        for i in xrange(len(data)):
+        for i in range(len(data)):
             self.write_int(where + i, Operators.ORD(data[i]), 8, force)
 
     def read_bytes(self, where, size, force=False):
@@ -637,7 +637,7 @@ class Cpu(Eventful):
         :rtype: list[int or Expression]
         '''
         result = []
-        for i in xrange(size):
+        for i in range(size):
             result.append(Operators.CHR(self.read_int(where + i, 8, force)))
         return result
 
@@ -754,7 +754,7 @@ class Cpu(Eventful):
 
         text = ''
         # Read Instruction from memory
-        for address in xrange(pc, pc + self.max_instr_width):
+        for address in range(pc, pc + self.max_instr_width):
             # This reads a byte from memory ignoring permissions
             # and concretize it if symbolic
             if not self.memory.access_ok(address, 'x'):

@@ -25,6 +25,7 @@ import time
 from .visitors import *
 from ...utils.helpers import issymbolic, istainted, memoized
 import collections
+from six.moves import range
 
 logger = logging.getLogger(__name__)
 
@@ -454,7 +455,7 @@ class Z3Solver(Solver):
             elif isinstance(expression, Array):
                 var = []
                 result = bytearray()
-                for i in xrange(expression.index_max):
+                for i in range(expression.index_max):
                     subvar = temp_cs.new_bitvec(expression.value_bits)
                     var.append(subvar)
                     temp_cs.add(subvar == expression[i])
@@ -463,7 +464,7 @@ class Z3Solver(Solver):
                 if self._check() != 'sat':
                     raise SolverException('Model is not available')
 
-                for i in xrange(expression.index_max):
+                for i in range(expression.index_max):
                     self._send('(get-value (%s))' % var[i].name)
                     ret = self._recv()
                     assert ret.startswith('((') and ret.endswith('))')

@@ -1,3 +1,4 @@
+from six.moves import range
 from manticore import Manticore
 
 def fixme():
@@ -19,7 +20,7 @@ def solve(state):
 
     # How big is the flag? We should be able to figure this out from traditional
     # static analysis
-    for i in xrange(fixme()):
+    for i in range(fixme()):
         # We can get the symbolic flag out
         symbolic_character = state.cpu.read_int(flag_base + i, 8)
         # And now we just need to solve for it in z3. How might we do that?
@@ -28,7 +29,7 @@ def solve(state):
         solution += chr(concrete_character)
 
     # And this should give us a solution, after which we're done!
-    print solution
+    print(solution)
     m.terminate()
 
 # play with these numbers!

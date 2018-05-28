@@ -1,4 +1,5 @@
 import six
+from six.moves import range
 from functools import reduce
 
 
@@ -638,14 +639,14 @@ class Array(Expression):
 
     def read_BE(self, address, size):
         bytes = []
-        for offset in xrange(size):
+        for offset in range(size):
             bytes.append(self.get(address + offset, 0))
         return BitVecConcat(size * self.value_bits, *bytes)
 
     def read_LE(self, address, size):
         address = self.cast_index(address)
         bytes = []
-        for offset in xrange(size):
+        for offset in range(size):
             bytes.append(self.get(address + offset, 0))
         return BitVecConcat(size * self.value_bits, *reversed(bytes))
 
@@ -653,7 +654,7 @@ class Array(Expression):
         address = self.cast_index(address)
         value = BitVec(size * self.value_bits).cast(value)
         array = self
-        for offset in xrange(size):
+        for offset in range(size):
             array = self.store(address + offset, BitVecExtract(value, (size - 1 - offset) * self.value_bits, self.value_bits))
         return array
 
@@ -661,7 +662,7 @@ class Array(Expression):
         address = self.cast_index(address)
         value = BitVec(size * self.value_bits).cast(value)
         array = self
-        for offset in reversed(xrange(size)):
+        for offset in reversed(range(size)):
             array = self.store(address + offset, BitVecExtract(value, (size - 1 - offset) * self.value_bits, self.value_bits))
         return array
 
@@ -862,7 +863,7 @@ class ArrayProxy(Array):
                 name = '{}_sliced_b{}_e{}'.format(self.name, start, stop)
             new_array = ArrayVariable(self.index_bits, size, self.value_bits, name=name, taint=self.taint)
             new_array = ArrayProxy(new_array)
-            for i in xrange(size):
+            for i in range(size):
                 if self.index_max is not None and not isinstance(i + start, Expression) and i + start >= self.index_max:
                     new_array[i] = 0
                 else:
@@ -879,7 +880,7 @@ class ArrayProxy(Array):
             start, stop = self._fix_index(index)
             size = self._get_size(index)
             assert len(value) == size
-            for i in xrange(size):
+            for i in range(size):
                 self.store(start + i, value[i])
         else:
             self.store(index, value)

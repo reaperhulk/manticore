@@ -8,6 +8,8 @@ import subprocess
 from capstone import *
 from capstone.x86 import *
 from flags import flags
+from six.moves import range
+
 flags_maks={
     'CF': 0x00001,
     'PF': 0x00004,
@@ -348,7 +350,7 @@ while True:
                     registers[reg_name] = gdb.getR(reg_name)
                     address += o.mem.scale*registers[reg_name]
                 address = address&({'i386': 0xffffffff, 'amd64': 0xffffffffffffffff}[arch])
-                for i in xrange(address, address+o.size):
+                for i in range(address, address+o.size):
                     memory[i] = chr(gdb.getByte(i))
 
 

@@ -1,6 +1,7 @@
 import copy
 import logging
 import six
+from six.moves import range
 
 from .smtlib import solver, Bool, ArrayProxy, Array
 from ..utils.helpers import issymbolic
@@ -252,7 +253,7 @@ class State(Eventful):
             self._input_symbols.append(symb)
 
             tmp = []
-            for i in xrange(size):
+            for i in range(size):
                 if data[i] == wildcard:
                     tmp.append(symb[i])
                 else:

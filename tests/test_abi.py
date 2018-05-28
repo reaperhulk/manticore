@@ -10,6 +10,7 @@ import hashlib
 import subprocess
 import collections
 import time
+from six.moves import range
 
 from manticore import Manticore, issymbolic
 from manticore import variadic
@@ -44,7 +45,7 @@ class ABITest(unittest.TestCase):
         self._cpu_x64.syscall_abi = AMD64LinuxSyscallAbi(self._cpu_x64)
 
         def write(mem, where, val, size):
-            mem[where:where+size/8] = [Operators.CHR(Operators.EXTRACT(val, offset, 8)) for offset in xrange(0, size, 8)]
+            mem[where:where+size/8] = [Operators.CHR(Operators.EXTRACT(val, offset, 8)) for offset in range(0, size, 8)]
         for val in range(0, 0x100, 4):
             write(mem32, 0x1000+val, val, 32)
         for val in range(0, 0x100, 8):

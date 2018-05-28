@@ -11,6 +11,7 @@ from ..binary import CGCElf
 from ..platforms.platform import Platform
 import logging
 import random
+from six.moves import range
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +64,7 @@ class Socket(object):
     def receive(self, size):
         rx_bytes = min(size, len(self.buffer))
         ret = []
-        for i in xrange(rx_bytes):
+        for i in range(rx_bytes):
             ret.append(self.buffer.pop())
         return ret
 
@@ -144,8 +145,8 @@ class Decree(Platform):
         # Each process can wait for one timeout
         self.timers = [None] * nprocs
         # each fd has a waitlist
-        self.rwait = [set() for _ in xrange(nfiles)]
-        self.twait = [set() for _ in xrange(nfiles)]
+        self.rwait = [set() for _ in range(nfiles)]
+        self.twait = [set() for _ in range(nfiles)]
 
         # Install event forwarders
         for proc in self.procs:
@@ -218,7 +219,7 @@ class Decree(Platform):
         :todo: FIX. move to cpu or memory
         """
         filename = ""
-        for i in xrange(0, 1024):
+        for i in range(0, 1024):
             c = Operators.CHR(cpu.read_int(buf + i, 8))
             if c == '\x00':
                 break
@@ -561,7 +562,7 @@ class Decree(Platform):
                 self.wait([], [fd], None)
                 raise RestartSyscall()
 
-            for i in xrange(0, count):
+            for i in range(0, count):
                 value = Operators.CHR(cpu.read_int(buf + i, 8))
                 if not isinstance(value, str):
                     logger.debug("TRANSMIT: Writing symbolic values to file %d", fd)
@@ -1028,7 +1029,7 @@ class SDecree(Decree):
             raise SymbolicSyscallArgument(cpu, 2)
 
         data = []
-        for i in xrange(count):
+        for i in range(count):
             if False:
                 # Too slow for the new age.
                 value = self.constraints.new_bitvec(8, name="RANDOM_%04d" % self.random)
@@ -1070,7 +1071,7 @@ class DecreeEmu(object):
             raise ConcretizeArgument(platform.current, 2)
 
         data = []
-        for i in xrange(count):
+        for i in range(count):
             value = cgcrandom.stream[DecreeEmu.RANDOM]
             data.append(value)
             DecreeEmu.random += 1

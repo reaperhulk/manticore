@@ -1,4 +1,4 @@
-from six.moves import cStringIO as StringIO
+from six.moves import cStringIO as StringIO, range
 from manticore.core.smtlib import Solver, Operators
 import unittest
 import tempfile, os
@@ -357,13 +357,13 @@ class MemoryTest(unittest.TestCase):
         #check all characters go and come back the same...
         #at the first byte of the mapping
         addr = 0x10000000
-        for c in xrange(0, 0x100):
+        for c in range(0, 0x100):
             m[addr] = Operators.CHR(c)
             self.assertEqual(m[addr], Operators.CHR(c))
 
         #at the last byte of the mapping
         addr = 0x10002000-1
-        for c in xrange(0, 0x100):
+        for c in range(0, 0x100):
             m[addr] = Operators.CHR(c)
             self.assertEqual(m[addr], Operators.CHR(c))
 
@@ -385,30 +385,30 @@ class MemoryTest(unittest.TestCase):
 
         #alloc/map a litlle mem
         addr = mem.mmap(None, 0x10, 'r')
-        for c in xrange(0, 0x10):
+        for c in range(0, 0x10):
             self.assertRaises(MemoryException, mem.__setitem__, addr+c, 'a')
 
         addr = mem.mmap(None, 0x10, 'x')
-        for c in xrange(0, 0x10):
+        for c in range(0, 0x10):
             self.assertRaises(MemoryException, mem.__setitem__, addr+c, 'a')
 
         addr = mem.mmap(None, 0x10, 'w')
-        for c in xrange(0, 0x10):
+        for c in range(0, 0x10):
             mem[addr+c] = 'a'
 
-        for c in xrange(0, 0x10):
+        for c in range(0, 0x10):
             self.assertRaises(MemoryException, mem.__getitem__, addr+c)
 
         addr = mem.mmap(None, 0x10, 'wx')
-        for c in xrange(0, 0x10):
+        for c in range(0, 0x10):
             mem[addr+c] = 'a'
-        for c in xrange(0, 0x10):
+        for c in range(0, 0x10):
             self.assertRaises(MemoryException, mem.__getitem__, addr+c)
 
         addr = mem.mmap(None, 0x10, 'rw')
-        for c in xrange(0, 0x10):
+        for c in range(0, 0x10):
             mem[addr+c] = 'a'
-        for c in xrange(0, 0x10):
+        for c in range(0, 0x10):
             self.assertEquals(mem[addr+c], 'a')
 
     def testBasicMappingsLimits(self):
@@ -431,7 +431,7 @@ class MemoryTest(unittest.TestCase):
         self.assertTrue(addr in mem)
         self.assertTrue(addr+size-1 in mem)
 
-        for i in xrange(addr, addr+size):
+        for i in range(addr, addr+size):
             self.assertTrue(i in mem)
 
         #negative tests
@@ -443,7 +443,7 @@ class MemoryTest(unittest.TestCase):
         self.assertFalse(addr+0x1000 in mem)
 
         #check all characters go and come back the same...
-        for c in xrange(0, 0x100):
+        for c in range(0, 0x100):
             mem[addr+0x800] = Operators.CHR(c)
             self.assertEqual(mem[addr+0x800], Operators.CHR(c))
 
@@ -965,7 +965,7 @@ class MemoryTest(unittest.TestCase):
         #One mapping
         self.assertEqual(len(mem.mappings()), 1)
 
-        for i in xrange(addr, addr+0x1000):
+        for i in range(addr, addr+0x1000):
             self.assertTrue(i in mem)
             self.assertTrue(mem.access_ok((i), 'r'))
             self.assertTrue(mem.access_ok((i), 'w'))
@@ -1175,11 +1175,11 @@ class MemoryTest(unittest.TestCase):
         size = 0x10000
         addr = mem.mmap(None, size, 'rwx')
         #initialize first 10 bytes as [100, 101, 102, .. 109]
-        for i in xrange(10):
+        for i in range(10):
             mem[addr+i] = Operators.CHR(100+i)
 
         #initialize first 10 bytes as [100, 101, 102, .. 109]
-        for i in xrange(10):
+        for i in range(10):
             self.assertEqual(mem[addr+i], Operators.CHR(100+i))
 
 
@@ -1242,7 +1242,7 @@ class MemoryTest(unittest.TestCase):
         size = 0x10000
         addr = mem.mmap(None, size, 'rwx')
         #initialize first 10 bytes as [100, 101, 102, .. 109]
-        for i in xrange(addr, addr+10):
+        for i in range(addr, addr+10):
             mem[i] = Operators.CHR(100+i-addr)
 
         #Make a char that ranges from 'A' to 'Z'

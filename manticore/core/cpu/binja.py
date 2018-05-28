@@ -2,6 +2,7 @@ import ctypes
 import logging
 import os
 import six
+from six.moves import range
 
 from collections import defaultdict
 
@@ -345,7 +346,7 @@ class BinjaCpu(Cpu):
         '''
         text = ''
         # Read Instruction from memory
-        for address in xrange(pc, pc + self.max_instr_width):
+        for address in range(pc, pc + self.max_instr_width):
             # This reads a byte from memory ignoring permissions
             # and concretize it if symbolic
             if not self.memory.access_ok(address, 'x'):
@@ -761,7 +762,6 @@ class BinjaCpu(Cpu):
     def GOTO(cpu, expr):
         # FIXME
         try:
-            # TODO: Is this right?
             if isinstance(expr.op, six.integer_types):
                 addr = cpu.disasm.current_llil_func[expr.op].address
             else:

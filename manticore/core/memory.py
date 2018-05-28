@@ -3,6 +3,7 @@ from weakref import WeakValueDictionary
 from .smtlib import *
 import logging
 import six
+from six.moves import range
 from ..utils.mappings import _mmap, _munmap
 from ..utils.helpers import issymbolic
 
@@ -310,7 +311,7 @@ class FileMap(Map):
             len(value) == index.stop - index.start
         index = self._get_offset(index)
         if isinstance(index, slice):
-            for i in xrange(index.stop - index.start):
+            for i in range(index.stop - index.start):
                 self._overlay[index.start + i] = value[i]
         else:
             self._overlay[index] = value
@@ -327,7 +328,7 @@ class FileMap(Map):
         index = self._get_offset(index)
         if isinstance(index, slice):
             result = []
-            for i in xrange(index.stop - index.start):
+            for i in range(index.stop - index.start):
                 result.append(get_byte_at_offset(i + index.start))
             return result
         else:
@@ -376,7 +377,7 @@ class COWMap(Map):
     def __setitem__(self, index, value):
         assert self._in_range(index)
         if isinstance(index, slice):
-            for i in xrange(index.stop - index.start):
+            for i in range(index.stop - index.start):
                 self._cow[index.start + i] = value[i]
         else:
             self._cow[index] = value
@@ -386,7 +387,7 @@ class COWMap(Map):
 
         if isinstance(index, slice):
             result = []
-            for i in xrange(index.start, index.stop):
+            for i in range(index.start, index.stop):
                 if i in self._cow:
                     result.append(self._cow[i])
                 else:
@@ -518,7 +519,7 @@ class Memory(object):
             end = start + size
 
         consecutive_free = 0
-        for p in xrange(self._page(end - 1), -1, -1):
+        for p in range(self._page(end - 1), -1, -1):
             if p not in self._page2map:
                 consecutive_free += 0x1000
             else:
@@ -566,7 +567,7 @@ class Memory(object):
         addr = self._search(size, addr)
 
         # It should not be allocated
-        for i in xrange(self._page(addr), self._page(addr + size)):
+        for i in range(self._page(addr), self._page(addr + size)):
             assert i not in self._page2map, 'Map already used'
 
         # Create the map
@@ -611,7 +612,7 @@ class Memory(object):
         addr = self._search(size, addr)
 
         # It should not be allocated
-        for i in xrange(self._page(addr), self._page(addr + size)):
+        for i in range(self._page(addr), self._page(addr + size)):
             assert i not in self._page2map, 'Map already used'
 
         # Create the anonymous map
@@ -637,7 +638,7 @@ class Memory(object):
         assert isinstance(m, Map)
         assert m in self._maps
         # remove m pages from the page2maps..
-        for p in xrange(self._page(m.start), self._page(m.end)):
+        for p in range(self._page(m.start), self._page(m.end)):
             del self._page2map[p]
         # remove m from the maps set
         self._maps.remove(m)
@@ -910,7 +911,7 @@ class SMemory(Memory):
         :param start: the starting address to delete.
         :param size: the length of the unmapping.
         '''
-        for addr in xrange(start, start + size):
+        for addr in range(start, start + size):
             if addr in self._symbols:
                 del self._symbols[addr]
         super(SMemory, self).munmap(start, size)
@@ -1003,13 +1004,13 @@ class SMemory(Memory):
 
             solutions = self._try_get_solutions(address, size, 'w', force=force)
 
-            for offset in xrange(size):
+            for offset in range(size):
                 for base in solutions:
                     condition = base == address
                     self._symbols.setdefault(base + offset, []).append((condition, value[offset]))
         else:
 
-            for offset in xrange(size):
+            for offset in range(size):
                 if issymbolic(value[offset]):
                     if not self.access_ok(address + offset, 'w', force):
                         raise InvalidMemoryAccess(address + offset, 'w')

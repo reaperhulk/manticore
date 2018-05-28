@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 import struct
 import unittest
+from six.moves import range
 from manticore.core.cpu.x86 import *
 from manticore.core.smtlib import Operators
 from manticore.core.memory import *
@@ -451,7 +452,7 @@ class SymCPUTest(unittest.TestCase):
         self.assertEqual(cpu.read_int(0x1000,64), 0x5556575845464748)
 
         #cpu.writeback()
-        for i in xrange(0x10):
+        for i in range(0x10):
             self.assertEqual(mem[i+0x1000], 'HGFEXWVUhgfedcba'[i])
         self.assertItemsEqual(mem.read(0x1000,0x10), 'HGFEXWVUhgfedcba')
 
@@ -476,7 +477,7 @@ class SymCPUTest(unittest.TestCase):
         self.assertEqual(cpu.read_int(0x1000,64), 0x5556575845464748)
 
         #cpu.writeback()
-        for i in xrange(0x10):
+        for i in range(0x10):
             self.assertEqual(mem[i+0x1000], 'HGFEXWVUhgfedcba'[i])
 
     def test_cache_003(self):
@@ -533,7 +534,7 @@ class SymCPUTest(unittest.TestCase):
 
         memory = ['\x00'] *0x1000
         written = set()
-        for _ in xrange(1000):
+        for _ in range(1000):
             address = random.randint(0x1000,0x2000-8)
             [written.add(i) for i in range(address,address+8)]
             value = random.randint(0x0,0xffffffffffffffff)

@@ -1,4 +1,5 @@
 import unittest
+from six.moves import range
 from manticore.utils.event import Eventful
 from manticore.platforms import linux
 from manticore.core.state import State
@@ -96,7 +97,7 @@ class StateTest(unittest.TestCase):
         self.state.constrain(expr < 100)
         solved = self.state.concretize(expr, 'ONE')
         self.assertEqual(len(solved), 1)
-        self.assertIn(solved[0], xrange(100))
+        self.assertIn(solved[0], range(100))
 
     def test_state(self):
         constraints = ConstraintSet()
