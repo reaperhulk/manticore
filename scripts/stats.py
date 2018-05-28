@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys, os, argparse
 import six
 from six.moves import cPickle
@@ -42,16 +43,16 @@ for filename in saved_states:
                 edges.setdefault(lastpc,[]).append(pc)
                 lastpc=pc
     except Exception as e:
-        print "#Failed to load saved state %s (%s)"%(filename,e)
+        print("#Failed to load saved state %s (%s)"%(filename,e))
 
 if args.pcfreq :
-    print '#PC:  frequency'
+    print('#PC:  frequency')
     for pc, freq in sorted(db.items(), key=lambda x: -x[1]):
-        print '%x: %d'%(pc,freq)
+        print('%x: %d'%(pc,freq))
 elif args.visited:
-    print '#PC'
+    print('#PC')
     for pc in db.keys():
-        print '%x'%pc
+        print('%x'%pc)
 elif args.bbs:
     assert len(set(edges['ROOT'])) == 1, "Something is wrong it should be only one root"
     bbs = set()
@@ -59,7 +60,7 @@ elif args.bbs:
         if len(set(targets)) > 1:
             [ bbs.add(x) for x in set(targets) ]
     bbs.add('ROOT')
-    print '#BBs'
+    print('#BBs')
     for origin in bbs:
         if origin not in edges:
             targets = set()
@@ -76,6 +77,6 @@ elif args.bbs:
         def p(x):
             return isinstance(x, six.integer_types) and hex(x) or x
 
-        print '%s -> [%s]'%(p(origin), ', '.join(map(p, targets)) )
+        print('%s -> [%s]'%(p(origin), ', '.join(map(p, targets)) ))
 
 
