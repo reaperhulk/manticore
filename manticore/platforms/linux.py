@@ -493,7 +493,7 @@ class Linux(Platform):
         nprocs = len(self.procs)
         nfiles = len(self.files)
         assert nprocs > 0
-        self.running = range(nprocs)
+        self.running = list(range(nprocs))
 
         # Each process can wait for one timeout
         self.timers = [None] * nprocs
