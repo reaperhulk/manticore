@@ -42,7 +42,7 @@ class Binary(object):
 
 
 from elftools.elf.elffile import ELFFile
-from six.moves import cStringIO
+from six.moves import StringIO
 
 
 class CGCElf(Binary):
@@ -51,7 +51,7 @@ class CGCElf(Binary):
     def _cgc2elf(filename):
         # hack begin so we can use upstream Elftool
         with open(filename, 'rb') as fd:
-            stream = cStringIO.StringIO(fd.read())
+            stream = StringIO(fd.read())
             stream.write('\x7fELF')
             stream.name = fd.name
             return stream
