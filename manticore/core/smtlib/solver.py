@@ -171,7 +171,7 @@ class Z3Solver(Solver):
         ''' Auxiliary method to spawn the external solver process'''
         assert '_proc' not in dir(self) or self._proc is None
         try:
-            self._proc = Popen(self._command.split(' '), stdin=PIPE, stdout=PIPE)
+            self._proc = Popen(self._command.split(' '), stdin=PIPE, stdout=PIPE, bufsize=0)
         except OSError as e:
             print(e, "Probably too  much cached expressions? visitors._cache...")
             # Z3 was removed from the system in the middle of operation
@@ -235,14 +235,14 @@ class Z3Solver(Solver):
         logger.debug('>%s', cmd)
         try:
             buf = str(cmd)
-            self._proc.stdin.write(buf + '\n')
+            self._proc.stdin.write(buf.encode('utf8') + b'\n')
         except IOError as e:
             raise SolverException(e)
 
     def _recv(self):
         ''' Reads the response from the solver '''
         def readline():
-            buf = self._proc.stdout.readline()
+            buf = self._proc.stdout.readline().decode('utf8')
             return buf, buf.count('('), buf.count(')')
         bufl = []
         left = 0

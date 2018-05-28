@@ -217,7 +217,7 @@ def UDIV(dividend, divisor):
     elif isinstance(divisor, BitVec):
         return divisor.rudiv(dividend)
     assert dividend >= 0 or divisor > 0  # unsigned-es
-    return dividend / divisor
+    return dividend // divisor
 
 
 def UREM(a, b):
