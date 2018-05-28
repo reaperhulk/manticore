@@ -1387,10 +1387,7 @@ def decode_long(data):
 # Shorthands
 
 
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO
+from six.moves import cStringIO as StringIO
 
 
 def dump(obj, file, protocol=None):

@@ -13,6 +13,7 @@ from ..core.smtlib.visitors import pretty_print, translate_to_smtlib, simplify
 from ..core.state import Concretize, TerminateState
 import logging
 import sys
+import six
 from collections import namedtuple
 if sys.version_info < (3, 6):
     import sha3
@@ -657,7 +658,7 @@ class EVMAsm(object):
             bytecode = bytearray(bytecode)
         bytecode = iter(bytecode)
         opcode = next(bytecode)
-        assert isinstance(opcode, (int, long))
+        assert isinstance(opcode, six.integer_types)
 
         invalid = ('INVALID', 0, 0, 0, 0, 'Unknown opcode')
         name, operand_size, pops, pushes, gas, description = EVMAsm._table.get(opcode, invalid)
@@ -1206,11 +1207,11 @@ class EVM(Eventful):
                    ITEM2
              sp->  {empty}
         '''
-        assert isinstance(value, (int, long)) or isinstance(value, BitVec) and value.size == 256
+        assert isinstance(value, six.integer_types) or isinstance(value, BitVec) and value.size == 256
         if len(self.stack) >= 1024:
             raise StackOverflow()
 
-        if isinstance(value, (int, long)):
+        if isinstance(value, six.integer_types):
             value = value & TT256M1
 
         value = simplify(value)
@@ -1225,7 +1226,7 @@ class EVM(Eventful):
         return self.stack.pop()
 
     def _consume(self, fee):
-        if isinstance(fee, (int, long)):
+        if isinstance(fee, six.integer_types):
             if fee > (1 << 512) - 1:
                 raise ValueError
         elif isinstance(fee, BitVec):
@@ -2192,7 +2193,7 @@ class EVMWorld(Platform):
         return self._world_state
 
     def __getitem__(self, index):
-        assert isinstance(index, (int, long))
+        assert isinstance(index, six.integer_types)
         return self.world_state[index]
 
     def __contains__(self, key):

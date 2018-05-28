@@ -1,4 +1,6 @@
-import StringIO
+import six
+from six.moves import StringIO
+import binascii
 import errno
 import fcntl
 import logging
@@ -246,7 +248,7 @@ class SymbolicFile(File):
         :rtype: int
         :return: the file offset.
         '''
-        assert isinstance(offset, (int, long))
+        assert isinstance(offset, six.integer_types)
         assert whence in (os.SEEK_SET, os.SEEK_CUR, os.SEEK_END)
 
         new_position = 0
@@ -619,7 +621,7 @@ class Linux(Platform):
         page_data = bytearray('\xf1\xde\xfd\xe7' * 1024)
 
         # Extracted from a RPi2
-        preamble = (
+        preamble = binascii.unhexlify(
             'ff0300ea' +
             '650400ea' +
             'f0ff9fe5' +
@@ -628,13 +630,13 @@ class Linux(Platform):
             '810400ea' +
             '000400ea' +
             '870400ea'
-        ).decode('hex')
+        )
 
         # XXX(yan): The following implementations of cmpxchg and cmpxchg64 were
         # handwritten to not use any exclusive instructions (e.g. ldrexd) or
         # locking. For actual implementations, refer to
         # arch/arm64/kernel/kuser32.S in the Linux source code.
-        __kuser_cmpxchg64 = (
+        __kuser_cmpxchg64 = binascii.unhexlify(
             '30002de9' +  # push    {r4, r5}
             '08c09de5' +  # ldr     ip, [sp, #8]
             '30009ce8' +  # ldm     ip, {r4, r5}
@@ -645,30 +647,30 @@ class Linux(Platform):
             '0c008c08' +  # stmeq   ip, {r2, r3}
             '3000bde8' +  # pop     {r4, r5}
             '1eff2fe1'   # bx      lr
-        ).decode('hex')
+        )
 
-        __kuser_dmb = (
+        __kuser_dmb = binascii.unhexlify(
             '5bf07ff5' +  # dmb ish
             '1eff2fe1'   # bx lr
-        ).decode('hex')
+        )
 
-        __kuser_cmpxchg = (
+        __kuser_cmpxchg = binascii.unhexlify(
             '003092e5' +  # ldr     r3, [r2]
             '000053e1' +  # cmp     r3, r0
             '0000a003' +  # moveq   r0, #0
             '00108205' +  # streq   r1, [r2]
             '0100a013' +  # movne   r0, #1
             '1eff2fe1'   # bx      lr
-        ).decode('hex')
+        )
 
         # Map a TLS segment
         self._arm_tls_memory = self.current.memory.mmap(None, 4, 'rw ')
 
-        __kuser_get_tls = (
+        __kuser_get_tls = binascii.unhexlify(
             '04009FE5' +  # ldr r0, [pc, #4]
             '010090e8' +  # ldm r0, {r0}
             '1eff2fe1'   # bx lr
-        ).decode('hex') + struct.pack('<I', self._arm_tls_memory)
+        ) + struct.pack('<I', self._arm_tls_memory)
 
         tls_area = '\x00' * 12
 
@@ -2674,12 +2676,12 @@ class SLinux(Linux):
             except SolverException:
                 fd.write('{SolverException}')
 
-        out = StringIO.StringIO()
-        inn = StringIO.StringIO()
-        err = StringIO.StringIO()
-        net = StringIO.StringIO()
-        argIO = StringIO.StringIO()
-        envIO = StringIO.StringIO()
+        out = StringIO()
+        inn = StringIO()
+        err = StringIO()
+        net = StringIO()
+        argIO = StringIO()
+        envIO = StringIO()
 
         for name, fd, data in self.syscall_trace:
             if name in ('_transmit', '_write'):

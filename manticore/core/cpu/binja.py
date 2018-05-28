@@ -1,6 +1,7 @@
 import ctypes
 import logging
 import os
+import six
 
 from collections import defaultdict
 
@@ -720,12 +721,12 @@ class BinjaCpu(Cpu):
         dividend_sign = (dividend & sign_mask) != 0
         divisor_sign = (divisor & sign_mask) != 0
 
-        if isinstance(divisor, (int, long)):
+        if isinstance(divisor, six.integer_types):
             if divisor_sign:
                 divisor = ((~divisor) + 1) & mask
                 divisor = -divisor
 
-        if isinstance(dividend, (int, long)):
+        if isinstance(dividend, six.integer_types):
             if dividend_sign:
                 dividend = ((~dividend) + 1) & mask
                 dividend = -dividend
@@ -760,7 +761,8 @@ class BinjaCpu(Cpu):
     def GOTO(cpu, expr):
         # FIXME
         try:
-            if isinstance(expr.op, long):
+            # TODO: Is this right?
+            if isinstance(expr.op, six.integer_types):
                 addr = cpu.disasm.current_llil_func[expr.op].address
             else:
                 raise NotImplementedError
@@ -951,19 +953,19 @@ class BinjaCpu(Cpu):
         dividend_sign = (dividend & sign_mask) != 0
         divisor_sign = (divisor & sign_mask) != 0
 
-        if isinstance(divisor, (int, long)):
+        if isinstance(divisor, six.integer_types):
             if divisor_sign:
                 divisor = ((~divisor) + 1) & mask
                 divisor = -divisor
 
-        if isinstance(dividend, (int, long)):
+        if isinstance(dividend, six.integer_types):
             if dividend_sign:
                 dividend = ((~dividend) + 1) & mask
                 dividend = -dividend
 
         quotient = Operators.SDIV(dividend, divisor)
-        if (isinstance(dividend, (int, long)) and
-                isinstance(dividend, (int, long))):
+        if (isinstance(dividend, six.integer_types) and
+                isinstance(dividend, six.integer_types)):
             remainder = dividend - (quotient * divisor)
         else:
             remainder = Operators.SREM(dividend, divisor)

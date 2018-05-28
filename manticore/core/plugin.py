@@ -1,3 +1,4 @@
+import binascii
 import logging
 import re
 from capstone import CS_GRP_JUMP
@@ -339,7 +340,7 @@ class FilterFunctions(Plugin):
             if self._include:
                 # constraint the input so it can take only the interesting values
                 from manticore.core.smtlib import Operators
-                constraint = reduce(Operators.OR, map(lambda x: tx.data[:4] == x.decode('hex'), selected_functions))
+                constraint = reduce(Operators.OR, map(lambda x: tx.data[:4] == binascii.unhexlify(x), selected_functions))
                 state.constrain(constraint)
             else:
                 #Avoid all not seleted hashes

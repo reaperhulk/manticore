@@ -1,6 +1,9 @@
 from __future__ import absolute_import
 from .expression import *
-from functools32 import lru_cache
+try:
+    from functools import lru_cache
+except:
+    from functools32 import lru_cache
 import logging
 import operator
 logger = logging.getLogger(__name__)
@@ -253,7 +256,7 @@ class ConstantFolderSimplifier(Visitor):
     operations = {BitVecAdd: operator.__add__,
                   BitVecSub: operator.__sub__,
                   BitVecMul: operator.__mul__,
-                  BitVecDiv: operator.__div__,
+                  BitVecDiv: operator.__truediv__,
                   BitVecShiftLeft: operator.__lshift__,
                   BitVecShiftRight: operator.__rshift__,
                   BitVecAnd: operator.__and__,

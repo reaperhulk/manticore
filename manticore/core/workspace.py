@@ -2,13 +2,10 @@ import os
 import sys
 import glob
 import signal
-import cPickle
+from six.moves import cPickle
 import logging
 import tempfile
-try:
-    import cStringIO as StringIO
-except ImportError:
-    import StringIO
+from six.moves import cStringIO as StringIO
 
 from contextlib import contextmanager
 from multiprocessing.managers import SyncManager
@@ -127,7 +124,7 @@ class Store(object):
         :param key:
         :return: A managed stream-like object
         """
-        s = StringIO.StringIO()
+        s = StringIO()
         yield s
         self.save_value(key, s.getvalue())
 
@@ -141,7 +138,7 @@ class Store(object):
         :return: A managed stream-like object
         """
         value = self.load_value(key)
-        yield StringIO.StringIO(value)
+        yield StringIO(value)
 
     def save_state(self, state, key):
         """

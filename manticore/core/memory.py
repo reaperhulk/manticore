@@ -2,6 +2,7 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 from weakref import WeakValueDictionary
 from .smtlib import *
 import logging
+import six
 from ..utils.mappings import _mmap, _munmap
 from ..utils.helpers import issymbolic
 
@@ -88,8 +89,8 @@ class Map(object):
         :param size: the size of the map.
         :param perms: the access permissions of the map (rwx).
         '''
-        assert isinstance(start, (int, long)) and start >= 0, 'Invalid start address'
-        assert isinstance(size, (int, long)) and size > 0, 'Invalid end address'
+        assert isinstance(start, six.integer_types) and start >= 0, 'Invalid start address'
+        assert isinstance(size, six.integer_types) and size > 0, 'Invalid end address'
 
         super(Map, self).__init__()
         self._start = start
@@ -281,7 +282,7 @@ class FileMap(Map):
                 This offset must be a multiple of pagebitsize.
         '''
         super(FileMap, self).__init__(addr, size, perms, **kwargs)
-        assert isinstance(offset, (int, long))
+        assert isinstance(offset, six.integer_types)
         assert offset >= 0
         self._filename = filename
         self._offset = offset
@@ -550,7 +551,7 @@ class Memory(object):
                    - 'Map already used' if the piece of memory starting in C{addr} and with length C{size} isn't free.
         '''
         # If addr is NULL, the system determines where to allocate the region.
-        assert addr is None or isinstance(addr, (int, long)), 'Address shall be concrete'
+        assert addr is None or isinstance(addr, six.integer_types), 'Address shall be concrete'
         assert addr < self.memory_size, 'Address too big'
         assert size > 0
 
@@ -596,7 +597,7 @@ class Memory(object):
 
         '''
         # If addr is NULL, the system determines where to allocate the region.
-        assert addr is None or type(addr) in [int, long], 'Address shall be concrete'
+        assert addr is None or isinstance(addr, six.integer_types), 'Address shall be concrete'
         assert addr < self.memory_size, 'Address too big'
 
         # address is rounded down to the nearest multiple of the allocation granularity

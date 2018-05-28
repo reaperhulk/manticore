@@ -2,6 +2,8 @@ import logging
 import sys
 import types
 
+import six
+
 
 class ContextFilter(logging.Filter):
     '''
@@ -18,7 +20,7 @@ class ContextFilter(logging.Filter):
         return '{}.{}'.format(prefix, components[-1])
 
     def filter(self, record):
-        if hasattr(self, 'stateid') and isinstance(self.stateid, (int, long)):
+        if hasattr(self, 'stateid') and isinstance(self.stateid, six.integer_types):
             record.stateid = '[%d]' % self.stateid
         else:
             record.stateid = ''

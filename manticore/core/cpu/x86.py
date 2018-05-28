@@ -1,5 +1,6 @@
 import collections
 import logging
+import six
 
 from functools import wraps
 
@@ -471,7 +472,7 @@ class AMD64RegFile(RegisterFile):
         return register in self.all_registers
 
     def _set_bv(self, register_id, register_size, offset, size, reset, value):
-        if isinstance(value, (int, long)):
+        if isinstance(value, six.integer_types):
             # type error or forgiving?
             # if (value & ~((1<<size)-1)) != 0 :
             #    raise TypeError('Value bigger than register')
@@ -500,7 +501,7 @@ class AMD64RegFile(RegisterFile):
 
     def _set_flag(self, register_id, register_size, offset, size, reset, value):
         assert size == 1
-        if not isinstance(value, (bool, int, long, BitVec, Bool)):
+        if not isinstance(value, (bool, six.integer_types, BitVec, Bool)):
             raise TypeError
         if isinstance(value, BitVec):
             if value.size != 1:
@@ -1597,14 +1598,14 @@ class X86Cpu(Cpu):
         divisor = Operators.ZEXTEND(src.read(), size * 2)
 
         # TODO make symbol friendly
-        if isinstance(divisor, (int, long)) and divisor == 0:
+        if isinstance(divisor, six.integer_types) and divisor == 0:
             raise DivideByZeroError()
         quotient = Operators.UDIV(dividend, divisor)
 
         MASK = (1 << size) - 1
 
         # TODO make symbol friendly
-        if isinstance(quotient, (int, long)) and quotient > MASK:
+        if isinstance(quotient, six.integer_types) and quotient > MASK:
             raise DivideByZeroError()
         remainder = Operators.UREM(dividend, divisor)
 
@@ -1674,7 +1675,7 @@ class X86Cpu(Cpu):
                                     cpu.read_register(reg_name_l))
 
         divisor = src.read()
-        if isinstance(divisor, (int, long)) and divisor == 0:
+        if isinstance(divisor, six.integer_types) and divisor == 0:
             raise DivideByZeroError()
 
         dst_size = src.size * 2
@@ -1686,19 +1687,19 @@ class X86Cpu(Cpu):
         dividend_sign = (dividend & sign_mask) != 0
         divisor_sign = (divisor & sign_mask) != 0
 
-        if isinstance(divisor, (int, long)):
+        if isinstance(divisor, six.integer_types):
             if divisor_sign:
                 divisor = ((~divisor) + 1) & mask
                 divisor = -divisor
 
-        if isinstance(dividend, (int, long)):
+        if isinstance(dividend, six.integer_types):
             if dividend_sign:
                 dividend = ((~dividend) + 1) & mask
                 dividend = -dividend
 
         quotient = Operators.SDIV(dividend, divisor)
-        if (isinstance(dividend, (int, long)) and
-                isinstance(dividend, (int, long))):
+        if (isinstance(dividend, six.integer_types) and
+                isinstance(dividend, six.integer_types)):
             # handle the concrete case
             remainder = dividend - (quotient * divisor)
         else:
@@ -3587,7 +3588,7 @@ class X86Cpu(Cpu):
 
         value = dest.read()
 
-        if isinstance(tempCount, (int, long)) and tempCount == 0:
+        if isinstance(tempCount, six.integer_types) and tempCount == 0:
             # this is a no-op
             new_val = value
             dest.write(new_val)
@@ -3633,7 +3634,7 @@ class X86Cpu(Cpu):
 
         value = dest.read()
 
-        if type(tempCount) in (int, long) and tempCount == 0:
+        if type(tempCount) in six.integer_types and tempCount == 0:
             # this is a no-op
             new_val = value
             dest.write(new_val)
@@ -3902,7 +3903,7 @@ class X86Cpu(Cpu):
         # count is masked based on destination size
         tempCount = Operators.ZEXTEND(count.read(), OperandSize) & (OperandSize - 1)
 
-        if type(tempCount) in (int, long) and tempCount == 0:
+        if type(tempCount) in six.integer_types and tempCount == 0:
             pass
         else:
             arg0 = dest.read()
@@ -3941,7 +3942,7 @@ class X86Cpu(Cpu):
         res = res & MASK
         dest.write(res)
 
-        if type(tempCount) in (int, long) and tempCount == 0:
+        if type(tempCount) in six.integer_types and tempCount == 0:
             pass
         else:
             SIGN_MASK = 1 << (OperandSize - 1)

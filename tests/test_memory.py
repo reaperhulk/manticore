@@ -1,4 +1,4 @@
-from cStringIO import StringIO
+from six.moves import cStringIO as StringIO
 from manticore.core.smtlib import Solver, Operators
 import unittest
 import tempfile, os

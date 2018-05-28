@@ -35,7 +35,7 @@ class FakePlatform(Eventful):
         self.procs = [FakeCpu()]
 
 
-    
+
     def __getstate__(self):
         state = super(FakePlatform, self).__getstate__()
         state['cons'] = self._constraints
@@ -139,7 +139,7 @@ class StateTest(unittest.TestCase):
 
     def test_tainted_symbolic_buffer(self):
         taint = ('TEST_TAINT', )
-        expr = self.state.new_symbolic_buffer(64, taint=taint)       
+        expr = self.state.new_symbolic_buffer(64, taint=taint)
         self.assertEqual(expr.taint, frozenset(taint))
 
     def test_tainted_symbolic_value(self):
@@ -148,7 +148,7 @@ class StateTest(unittest.TestCase):
         self.assertEqual(expr.taint, frozenset(taint))
 
     def testContextSerialization(self):
-        import cPickle as pickle
+        from six.moves import cPickle as pickle
         initial_file = ''
         new_file = ''
         new_new_file = ''
@@ -160,7 +160,7 @@ class StateTest(unittest.TestCase):
             self.assertEqual( initial_state.context['step'], 10)
             self.assertEqual( new_state.context['step'], 10)
 
-            new_state.context['step'] = 20 
+            new_state.context['step'] = 20
 
             self.assertEqual( initial_state.context['step'], 10)
             self.assertEqual( new_state.context['step'], 20)
@@ -171,7 +171,7 @@ class StateTest(unittest.TestCase):
                 self.assertEqual( new_state.context['step'], 20)
                 self.assertEqual( new_new_state.context['step'], 20)
 
-                new_new_state.context['step'] += 10 
+                new_new_state.context['step'] += 10
 
                 self.assertEqual( initial_state.context['step'], 10)
                 self.assertEqual( new_state.context['step'], 20)
@@ -220,7 +220,7 @@ class StateTest(unittest.TestCase):
             self.assertEqual( initial_state.context['step'], 10)
             self.assertEqual( new_state.context['step'], 10)
 
-            new_state.context['step'] = 20 
+            new_state.context['step'] = 20
 
             self.assertEqual( initial_state.context['step'], 10)
             self.assertEqual( new_state.context['step'], 20)
@@ -231,7 +231,7 @@ class StateTest(unittest.TestCase):
                 self.assertEqual( new_state.context['step'], 20)
                 self.assertEqual( new_new_state.context['step'], 20)
 
-                new_new_state.context['step'] += 10 
+                new_new_state.context['step'] += 10
 
                 self.assertEqual( initial_state.context['step'], 10)
                 self.assertEqual( new_state.context['step'], 20)
@@ -260,7 +260,7 @@ class StateTest(unittest.TestCase):
         self.assertEqual( new_state.context['step'], 20)
         new_new_state = pickle.loads(new_new_file)
         self.assertEqual( new_new_state.context['step'], 30)
-        
+
     def test_state_gen(self):
         self.state.subscribe('will_generate_testcase', self._test_state_gen_helper)
         with self.assertRaises(_CallbackExecuted):

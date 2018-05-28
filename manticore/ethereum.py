@@ -16,8 +16,9 @@ from Queue import Empty as EmptyQueue
 import sha3
 import json
 import logging
-import StringIO
-import cPickle as pickle
+import six
+from six.moves import cStringIO as StringIO
+from six.moves import cPickle as pickle
 from .core.plugin import Plugin
 from functools import reduce
 
@@ -346,7 +347,7 @@ class ABI(object):
             return ABI.serialize_string(value)
         if isinstance(value, (list)):
             return ABI.serialize_array(value)
-        if isinstance(value, (int, long)):
+        if isinstance(value, six.integer_types):
             return ABI.serialize_uint(value)
         if isinstance(value, ABI.SByte):
             return ABI.serialize_uint(value.size) + (None,) * value.size + (('\x00',) * (32 - (value.size % 32)))
@@ -389,7 +390,7 @@ class ABI(object):
         '''
         s = sha3.keccak_256()
         s.update(method_name_and_signature)
-        return s.hexdigest()[:8].decode('hex')
+        return s.digest()[:4]
 
     @staticmethod
     def make_function_arguments(*args):
@@ -454,7 +455,7 @@ class ABI(object):
     @staticmethod
     def get_uint(data, nbytes, offset):
         """
-        Read a `nbytes` bytes long big endian unsigned integer from `data` starting at `offset` 
+        Read a `nbytes` bytes long big endian unsigned integer from `data` starting at `offset`
 
         :param data: sliceable buffer; symbolic buffer of Eth ABI encoded data
         :param offset: byte offset
@@ -673,7 +674,7 @@ class ManticoreEVM(Manticore):
             #Initialize user and contracts
             user_account = m.create_account(balance=1000)
             contract_account = m.solidity_create_contract(source_code, owner=user_account, balance=0)
-            contract_account.set(12345, value=100) 
+            contract_account.set(12345, value=100)
 
             seth.report()
             print seth.coverage(contract_account)
@@ -803,7 +804,7 @@ class ManticoreEVM(Manticore):
 
             :param source_code: solidity source as either a string or a file handle
             :param contract_name: a string with the name of the contract to analyze
-            :param libraries: an itemizable of pairs (library_name, address) 
+            :param libraries: an itemizable of pairs (library_name, address)
             :return: name, source_code, bytecode, srcmap, srcmap_runtime, hashes
             :return: name, source_code, bytecode, runtime, srcmap, srcmap_runtime, hashes, abi, warnings
         """
@@ -1522,7 +1523,7 @@ class ManticoreEVM(Manticore):
                 runtime_code = state.solve_one(blockchain.get_code(account_address))
                 if runtime_code:
                     summary.write("Code:\n")
-                    fcode = StringIO.StringIO(runtime_code)
+                    fcode = StringIO(runtime_code)
                     for chunk in iter(lambda: fcode.read(32), b''):
                         summary.write('\t%s\n' % chunk.encode('hex'))
                     runtime_trace = set((pc for contract, pc, at_init in state.context['evm.trace'] if address == contract and not at_init))

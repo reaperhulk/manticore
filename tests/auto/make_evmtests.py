@@ -1,6 +1,7 @@
 from __future__ import print_function
+import binascii
+import six
 from pprint import pformat
-from cStringIO import StringIO
 
 def pretty(value, htchar=' ', lfchar='\n', indent=0, width=100):
     nlch = lfchar + htchar * (indent + 1)
@@ -30,7 +31,7 @@ def pretty(value, htchar=' ', lfchar='\n', indent=0, width=100):
             width = width - indent
             width = max(1, width)
             o = []
-            for pos in range(0, len(value), width): 
+            for pos in range(0, len(value), width):
                 o.append(repr(value[pos: pos+width]) )
             return ('\\' + lfchar + htchar * indent).join(o)
         return repr(value)
@@ -42,14 +43,14 @@ pp = pretty
 def spprint(x, indent=0, width=None,**kwargs):
     if width is not None and isinstance(x, str):
         o = ''
-        for pos in range(0, len(x), width): 
+        for pos in range(0, len(x), width):
             o += ' '*indent + repr(x[pos: pos+width]) + '\\'
         return o
     x = pformat(x, indent=0)
     return (('\n'+' '*indent)).join(x.split('\n'))
 
 def i(x):
-    if isinstance(x, (int, long)):
+    if isinstance(x, six.integer_types):
         return x
     assert isinstance(x, (str, unicode))
     if not x.startswith('0x'):
@@ -79,7 +80,7 @@ def gen_test(testcase, testname, skip):
     for address in pre.keys():
         iaddress = i(address)
         world[iaddress] = {}
-        world[iaddress]['code'] = pre[address][u'code'][2:].decode('hex')
+        world[iaddress]['code'] = binascii.unhexlify(pre[address][u'code'][2:])
         world[iaddress]['nonce'] = i(pre[address][u'nonce'])
         world[iaddress]['balance'] = i(pre[address][u'balance'])
         world[iaddress]['storage'] = {}
@@ -95,7 +96,7 @@ def gen_test(testcase, testname, skip):
         if key == 'gasPrice':
             pkey = 'price'
         if key in ['data', 'code']:
-            value = exe[key][2:].decode('hex')
+            value = binascii.unhexlify(exe[key][2:])
         else:
             value = i(exe[key])
 
@@ -108,14 +109,14 @@ def gen_test(testcase, testname, skip):
         for address in pos.keys():
             iaddress = i(address)
             world[iaddress] = {}
-            world[iaddress]['code'] = pos[address][u'code'][2:].decode('hex')
+            world[iaddress]['code'] = binascii.unhexlify(pos[address][u'code'][2:])
             world[iaddress]['nonce'] = i(pos[address][u'nonce'])
             world[iaddress]['balance'] = i(pos[address][u'balance'])
-            world[iaddress]['storage'] = {} 
+            world[iaddress]['storage'] = {}
             for key, value in pos[address][u'storage'].items():
-                world[iaddress]['storage'][i(key)] = i(value)        
+                world[iaddress]['storage'][i(key)] = i(value)
         output += "        pos_world = " + pprint(world, indent=27) + '\n'
-    
+
     else:
         output += "        pos_world = None\n"
     pos_world = world
@@ -125,30 +126,30 @@ def gen_test(testcase, testname, skip):
     output += '''
         constraints = ConstraintSet()
         platform = evm.EVMWorld(constraints)'''
-    
+
     for address, contract in pre_world.items():
-        output +='''           
-        platform.create_account(address=%s, 
-                                balance=%s, 
-                                code=%s, 
+        output +='''
+        platform.create_account(address=%s,
+                                balance=%s,
+                                code=%s,
                                 storage=%s
                                 )''' % (pp(address),
-                                        pp(contract['balance']), 
-                                        pp(contract['code'],width=60, indent=37), 
+                                        pp(contract['balance']),
+                                        pp(contract['code'],width=60, indent=37),
                                         pp(contract['storage'],width=80, indent=40))
 
-        output +='''           
-        platform.create_account(address=%s, 
-                                balance=%s, 
-                                code=%s, 
+        output +='''
+        platform.create_account(address=%s,
+                                balance=%s,
+                                code=%s,
                                 storage=%s
                                 )''' % (pp(transaction['caller']),
-                                        pp(contract['balance']), 
-                                        pp(contract['code'],width=60, indent=37), 
+                                        pp(contract['balance']),
+                                        pp(contract['code'],width=60, indent=37),
                                         pp(contract['storage'],width=80, indent=40))
 
 
-    output += '''        
+    output += '''
         address = %s
         origin = %s
         price = %s
@@ -161,17 +162,17 @@ def gen_test(testcase, testname, skip):
     pp(transaction['data']),
     pp(transaction['caller']),
     pp(transaction['value']) )
-    output += '''        
+    output += '''
         #platform.transaction(address, origin, price, data, caller, value, header)
         bytecode = platform.storage[address]['code']
         new_vm = EVM(constraints, address, origin, price, data, caller, value, bytecode, header, global_storage=platform.storage)
-        
-  
+
+
         throw = False
         try:
             #platform.run()
             new_vm.run()
-        except state.TerminateState as e:                
+        except state.TerminateState as e:
             if e.message != 'STOP':
                 throw = True
 
@@ -181,7 +182,7 @@ def gen_test(testcase, testname, skip):
             self.assertEqual( pos_world, platform.storage)
 '''
 
-    
+
     return output
 
 import sys, os, json
@@ -202,8 +203,8 @@ import os
 
 class EVMTest_%s(unittest.TestCase):
     _multiprocess_can_split_ = True
-    maxDiff=None 
-'''%  os.path.split(sys.argv[1][:-5])[1]) 
+    maxDiff=None
+'''%  os.path.split(sys.argv[1][:-5])[1])
 
     js = file(filename).read()
     tests = dict(json.loads(js))
@@ -239,7 +240,7 @@ class EVMTest_%s(unittest.TestCase):
 'f76b7c41b0a7d2879851037f8eea928fc7302bd60fd6af4b6e4030a3a24436b4','f8660436772f63f5cd6bb20e12150cdc66f5238f78d872196f49bc9bf7b5d68d',
 'fa78200fce12b17e9c320d743ddd7d32094326376fe9f6bf9964b285a9350a7e', 'DynamicJump0_foreverOutOfGas', 'JDfromStorageDynamicJump0_foreverOutOfGas', 'ABAcalls1', 'ABAcalls3', 'CallToNameRegistratorTooMuchMemory1','callcodeToNameRegistrator0'):
             skip = True
-        #print filename, test_name, tests[test_name]    
+        #print filename, test_name, tests[test_name]
         name = 'test_%s_%s'%(filename[:-5],test_name)
         name = str(name.replace('.', '_'))
         print(gen_test(testcase, test_name, skip))

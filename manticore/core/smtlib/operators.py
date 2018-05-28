@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from .expression import *
 from ...utils.helpers import issymbolic, istainted
 import math
+import six
 
 
 def ORD(s):
@@ -10,7 +11,7 @@ def ORD(s):
             return s
         else:
             return BitVecExtract(s, 0, 7)
-    elif isinstance(s, (int, long)):
+    elif isinstance(s, six.integer_types):
         return s & 0xff
     else:
         return ord(s)
@@ -22,7 +23,7 @@ def CHR(s):
             return s
         else:
             return BitVecExtract(s, 0, 8)
-    elif isinstance(s, (int, long)):
+    elif isinstance(s, six.integer_types):
         return chr(s & 0xff)
     else:
         assert len(s) == 1
@@ -32,7 +33,7 @@ def CHR(s):
 def NOT(a):
     if isinstance(a, bool):
         return not a
-    if isinstance(a, (Bool, int, long)):
+    if isinstance(a, (Bool, six.integer_types)):
         return ~a
     return a == False
 
@@ -56,14 +57,14 @@ def OR(a, b, *others):
     if isinstance(b, Bool):
         return b | a
     result = a | b
-    if isinstance(result, (BitVec, int, long)):
+    if isinstance(result, (BitVec, six.integer_types)):
         result = ITE(result != 0, True, False)
     return result
 
 
 def XOR(a, b):
     result = a ^ b
-    if isinstance(result, (BitVec, int, long)):
+    if isinstance(result, (BitVec, six.integer_types)):
         result = ITE(result != 0, True, False)
     return result
 
@@ -130,7 +131,7 @@ def EXTRACT(x, offset, size):
 
 
 def SEXTEND(x, size_src, size_dest):
-    if isinstance(x, (int, long)):
+    if isinstance(x, six.integer_types):
         if x >= (1 << (size_src - 1)):
             x -= 1 << size_src
         return x & ((1 << size_dest) - 1)
@@ -139,7 +140,7 @@ def SEXTEND(x, size_src, size_dest):
 
 
 def ZEXTEND(x, size):
-    if isinstance(x, (int, long)):
+    if isinstance(x, six.integer_types):
         return x & ((1 << size) - 1)
     assert isinstance(x, BitVec) and size - x.size >= 0
     if size - x.size > 0:
@@ -153,7 +154,7 @@ def CONCAT(total_size, *args):
     if any(issymbolic(x) for x in args):
         if len(args) > 1:
             def cast(x):
-                if isinstance(x, (int, long)):
+                if isinstance(x, six.integer_types):
                     return BitVecConstant(arg_size, x)
                 return x
             return BitVecConcat(total_size, *map(cast, args))
@@ -167,8 +168,8 @@ def CONCAT(total_size, *args):
 
 
 def ITE(cond, true_value, false_value):
-    assert isinstance(true_value, (Bool, bool, BitVec, int, long))
-    assert isinstance(false_value, (Bool, bool, BitVec, int, long))
+    assert isinstance(true_value, (Bool, bool, BitVec, six.integer_types))
+    assert isinstance(false_value, (Bool, bool, BitVec, six.integer_types))
     assert isinstance(cond, (Bool, bool))
     if isinstance(cond, bool):
         if cond:
@@ -188,13 +189,13 @@ def ITE(cond, true_value, false_value):
 def ITEBV(size, cond, true_value, false_value):
     if isinstance(cond, BitVec):
         cond = cond.Bool()
-    if isinstance(cond, (int, long)):
+    if isinstance(cond, six.integer_types):
         cond = (cond != 0)
 
     assert isinstance(cond, (Bool, bool))
-    assert isinstance(true_value, (BitVec, int, long))
-    assert isinstance(false_value, (BitVec, int, long))
-    assert isinstance(size, (int, long))
+    assert isinstance(true_value, (BitVec, six.integer_types))
+    assert isinstance(false_value, (BitVec, six.integer_types))
+    assert isinstance(size, six.integer_types)
 
     if isinstance(cond, bool):
         if cond:
@@ -202,10 +203,10 @@ def ITEBV(size, cond, true_value, false_value):
         else:
             return false_value
 
-    if isinstance(true_value, (int, long)):
+    if isinstance(true_value, six.integer_types):
         true_value = BitVecConstant(size, true_value)
 
-    if isinstance(false_value, (int, long)):
+    if isinstance(false_value, six.integer_types):
         false_value = BitVecConstant(size, false_value)
     return BitVecITE(size, cond, true_value, false_value)
 
@@ -268,7 +269,7 @@ def simplify(value):
 
 
 def SAR(size, a, b):
-    assert isinstance(size, (int, long))
+    assert isinstance(size, six.integer_types)
     if isinstance(b, BitVec) and b.size != size:
         b = ZEXTEND(b, size)
     if isinstance(a, BitVec):

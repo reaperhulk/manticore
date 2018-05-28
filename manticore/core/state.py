@@ -1,5 +1,6 @@
 import copy
 import logging
+import six
 
 from .smtlib import solver, Bool, ArrayProxy, Array
 from ..utils.helpers import issymbolic
@@ -346,7 +347,7 @@ class State(Eventful):
         :return: Concrete value
         :rtype: list[int]
         '''
-        if isinstance(expr, (int, long)):
+        if isinstance(expr, six.integer_types):
             return expr
         return self._solver.max(self._constraints, expr)
 
@@ -359,7 +360,7 @@ class State(Eventful):
         :return: Concrete value
         :rtype: list[int]
         '''
-        if isinstance(expr, (int, long)):
+        if isinstance(expr, six.integer_types):
             return expr
         return self._solver.min(self._constraints, expr)
 

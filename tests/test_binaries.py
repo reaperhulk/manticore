@@ -1,4 +1,3 @@
-import StringIO
 import unittest
 import sys
 import shutil
@@ -168,7 +167,7 @@ class IntegrationTest(unittest.TestCase):
     def test_basic_arm(self):
         dirname = os.path.dirname(__file__)
         filename = os.path.abspath(os.path.join(dirname, 'binaries', 'basic_linux_armv7'))
-        workspace = os.path.join(self.test_dir,'workspace') 
+        workspace = os.path.join(self.test_dir,'workspace')
         output = subprocess.check_output(['python', '-m', 'manticore', '--workspace', workspace, filename])
 
         with open(os.path.join(workspace, "test_00000000.stdout")) as f:
@@ -195,7 +194,7 @@ class IntegrationTest(unittest.TestCase):
 	    sbrk(-(2<<20));
 	    int valid_after_bad_brk = (p == sbrk(0));
 
-	    if (valid_at_first && valid_after_shift 
+	    if (valid_at_first && valid_after_shift
 		    && valid_after_reset && valid_after_bad_brk)
 		return 0;
 	    else

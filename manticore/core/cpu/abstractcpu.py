@@ -1,10 +1,12 @@
 import inspect
 import logging
-import StringIO
+from six.moves import cStringIO as StringIO
 import string
 
 from functools import wraps
-from itertools import islice, imap
+from itertools import islice
+import six
+from six.moves import map
 
 import capstone as cs
 import unicorn
@@ -319,7 +321,7 @@ class Abi(object):
 
         # Create a stream of resolved arguments from argument descriptors
         descriptors = self.get_arguments()
-        argument_iter = imap(resolve_argument, descriptors)
+        argument_iter = map(resolve_argument, descriptors)
 
         # TODO(mark) this is here as a hack to avoid circular import issues
         from ...models import isvariadic
@@ -667,7 +669,7 @@ class Cpu(Eventful):
         :return: string read
         :rtype: str
         '''
-        s = StringIO.StringIO()
+        s = StringIO()
         while True:
             c = self.read_int(where, 8, force)
 
@@ -902,7 +904,7 @@ class Cpu(Eventful):
         if issymbolic(value):
             aux = "%3s: " % reg_name + "%16s" % value
             result += aux
-        elif isinstance(value, (int, long)):
+        elif isinstance(value, six.integer_types):
             result += "%3s: 0x%016x" % (reg_name, value)
         else:
             result += "%3s: %r" % (reg_name, value)

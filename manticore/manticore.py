@@ -28,6 +28,7 @@ from .utils.event import Eventful
 from .core.plugin import Plugin, InstructionCounter, RecordSymbolicBranches, Visited, Tracer
 import logging
 from .utils import log
+import six
 
 logger = logging.getLogger(__name__)
 log.init_logging()
@@ -469,7 +470,7 @@ class Manticore(Eventful):
         :type pc: int or None
         :param callable callback: Hook function
         '''
-        if not (isinstance(pc, (int, long)) or pc is None):
+        if not (isinstance(pc, six.integer_types) or pc is None):
             raise TypeError("pc must be either an int or None, not {}".format(pc.__class__.__name__))
         else:
             self._hooks.setdefault(pc, set()).add(callback)
@@ -482,7 +483,7 @@ class Manticore(Eventful):
         # Ignore symbolic pc.
         # TODO(yan): Should we ask the solver if any of the hooks are possible,
         # and execute those that are?
-        if not isinstance(pc, (int, long)):
+        if not isinstance(pc, six.integer_types):
             return
 
         # Invoke all pc-specific hooks

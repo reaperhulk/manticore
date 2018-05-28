@@ -1,4 +1,6 @@
-import sys, os, cPickle, argparse
+import sys, os, argparse
+import six
+from six.moves import cPickle
 #Process the data of a workspace and prints out some global information
 
 def parse_arguments():
@@ -72,7 +74,7 @@ elif args.bbs:
                     break
 
         def p(x):
-            return isinstance(x, (int, long)) and hex(x) or x
+            return isinstance(x, six.integer_types) and hex(x) or x
 
         print '%s -> [%s]'%(p(origin), ', '.join(map(p, targets)) )
 
