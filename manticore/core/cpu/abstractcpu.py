@@ -549,10 +549,10 @@ class Cpu(Eventful):
 
         :param str name: Name of the register
         '''
-        assert name != '_regfile'
-        if hasattr(self, '_regfile') and name in self._regfile:
+        if name == '_regfile' or not name in self._regfile:
+            raise AttributeError(name)
+        else:
             return self.read_register(name)
-        raise AttributeError(name)
 
     def __setattr__(self, name, value):
         '''
