@@ -1,4 +1,5 @@
-from expression import *
+from __future__ import absolute_import
+from .expression import *
 from ...utils.helpers import issymbolic, istainted
 import math
 
@@ -224,7 +225,7 @@ def UREM(a, b):
     if isinstance(b, BitVec):
         return b.rurem(a)
     if a < 0 or b < 0:
-        raise "azaraza"
+        raise Exception("azaraza")
     return a % b
 
 

@@ -1,4 +1,5 @@
-import cgcrandom
+from __future__ import absolute_import
+from . import cgcrandom
 # TODO use cpu factory
 from ..core.cpu.x86 import I386Cpu
 from ..core.cpu.abstractcpu import Interruption, Syscall, ConcretizeRegister
@@ -745,8 +746,8 @@ class Decree(Platform):
         if cpu.EAX not in syscalls.keys():
             raise TerminateState("32 bit DECREE system call number {} Not Implemented".format(cpu.EAX))
         func = syscalls[cpu.EAX]
-        logger.debug("SYSCALL32: %s (nargs: %d)", func.func_name, func.func_code.co_argcount)
-        nargs = func.func_code.co_argcount
+        logger.debug("SYSCALL32: %s (nargs: %d)", func.__name__, func.__code__.co_argcount)
+        nargs = func.__code__.co_argcount
         args = [cpu, cpu.EBX, cpu.ECX, cpu.EDX, cpu.ESI, cpu.EDI, cpu.EBP]
         cpu.EAX = func(*args[:nargs - 1])
 
@@ -1055,7 +1056,7 @@ class DecreeEmu(object):
 
     @staticmethod
     def cgc_random(platform, buf, count, rnd_bytes):
-        import cgcrandom
+        from . import cgcrandom
         if issymbolic(buf):
             logger.info("Ask to write random bytes to a symbolic buffer")
             raise ConcretizeArgument(platform.current, 0)
