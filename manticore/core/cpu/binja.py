@@ -1270,7 +1270,7 @@ def x86_get_eflags(cpu, reg):
     }
 
     flags = []
-    for flag, offset in x86_flags.iteritems():
+    for flag, offset in six.iteritems(x86_flags):
         flags.append((cpu.regfile.registers.get(flag, 0), offset))
 
     if any(issymbolic(flag) for flag, offset in flags):

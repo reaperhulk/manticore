@@ -2401,7 +2401,7 @@ class Linux(Platform):
         # Establish segment registers for x86 architectures
         if self.arch in {'i386', 'amd64'}:
             x86_defaults = {'CS': 0x23, 'SS': 0x2b, 'DS': 0x2b, 'ES': 0x2b}
-            for reg, val in x86_defaults.iteritems():
+            for reg, val in six.iteritems(x86_defaults):
                 self.current.regfile.write(reg, val)
 
         if is_binja_disassembler(self.disasm):

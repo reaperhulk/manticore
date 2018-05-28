@@ -539,7 +539,7 @@ class AMD64RegFile(RegisterFile):
                                    BitVecConstant(register_size, 0))
 
         flags = []
-        for flag, offset in self._flags.iteritems():
+        for flag, offset in six.iteritems(self._flags):
             flags.append((self._registers[flag], offset))
 
         if any(issymbolic(flag) for flag, offset in flags):
@@ -553,7 +553,7 @@ class AMD64RegFile(RegisterFile):
     def _set_flags(self, reg, res):
         ''' Set individual flags from a EFLAGS/RFLAGS value '''
         #assert sizeof (res) == 32 if reg == 'EFLAGS' else 64
-        for flag, offset in self._flags.iteritems():
+        for flag, offset in six.iteritems(self._flags):
             self.write(flag, Operators.EXTRACT(res, offset, 1))
 
     def write(self, name, value):

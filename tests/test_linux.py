@@ -5,6 +5,8 @@ import shutil
 import tempfile
 import unittest
 
+import six
+
 from manticore.platforms import linux, linux_syscalls
 from manticore.core.smtlib import *
 from manticore.core.smtlib import *
@@ -31,7 +33,7 @@ class LinuxTest(unittest.TestCase):
         }
         cpu = self.linux.current
 
-        for reg, val in x86_defaults.iteritems():
+        for reg, val in six.iteritems(x86_defaults):
             self.assertEqual(cpu.regfile.read(reg), val)
 
     def test_stack_init(self):

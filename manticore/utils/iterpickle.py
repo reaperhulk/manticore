@@ -33,6 +33,8 @@ import marshal
 import sys
 import struct
 import re
+
+import six
 from six.moves import range
 
 __all__ = ["PickleError", "PicklingError", "UnpicklingError", "Pickler",
@@ -665,7 +667,7 @@ class Pickler:
             write(MARK + DICT)
 
         self.memoize(obj)
-        yield self._batch_setitems(obj.iteritems())
+        yield self._batch_setitems(six.iteritems(obj))
 
     dispatch[DictionaryType] = save_dict
     if PyStringMap is not None:
@@ -1245,7 +1247,7 @@ class Unpickler:
             try:
                 d = inst.__dict__
                 try:
-                    for k, v in state.iteritems():
+                    for k, v in six.iteritems(state):
                         d[sys.intern(k)] = v
                 # keys in state don't have to be strings
                 # don't blow up, but don't go out of our way

@@ -1,6 +1,7 @@
 import inspect
 import logging
 from weakref import WeakKeyDictionary, ref
+import six
 
 logger = logging.getLogger(__name__)
 
@@ -87,7 +88,7 @@ class Eventful(object):
         # This simply removes all callback methods associated with that object
         # Also if no more callbacks at all for an event name it deletes the event entry
         remove = set()
-        for name, bucket in self._signals.iteritems():
+        for name, bucket in six.iteritems(self._signals):
             if robj in bucket:
                 del bucket[robj]
             if len(bucket) == 0:
@@ -106,9 +107,10 @@ class Eventful(object):
             if _name.startswith(prefix):
                 basename = _name[len(prefix):]
 
-        cls = self.__class__
-        if basename not in cls.__all_events__[cls]:
-            logger.warning("Event '%s' not pre-declared. (self: %s)", _name, repr(self))
+        # TODO: re-enable this.
+        # cls = self.__class__
+        # if basename not in cls.__all_events__[cls]:
+        #     logger.warning("Event '%s' not pre-declared. (self: %s)", _name, repr(self))
 
     # Wrapper for _publish_impl that also makes sure the event is published from
     # a class that supports it.
@@ -121,7 +123,7 @@ class Eventful(object):
     # shouldn't check the event.
     def _publish_impl(self, _name, *args, **kwargs):
         bucket = self._get_signal_bucket(_name)
-        for robj, methods in bucket.iteritems():
+        for robj, methods in six.iteritems(bucket):
             for callback in methods:
                 callback(robj(), *args, **kwargs)
 

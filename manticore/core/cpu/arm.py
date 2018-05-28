@@ -439,7 +439,7 @@ class Armv7Cpu(Cpu):
         # XXX: capstone incorrectly sets .update_flags for adc
         if self.instruction.mnemonic == 'adc':
             return
-        for flag, val in self._last_flags.iteritems():
+        for flag, val in six.iteritems(self._last_flags):
             flag_name = 'APSR_{}'.format(flag)
             self.regfile.write(flag_name, val)
 

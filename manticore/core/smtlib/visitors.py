@@ -332,7 +332,7 @@ def clean_cache(cache):
         import random
         N = len(cache) - M
         for i in range(N):
-            cache.pop(random.choice(cache.keys()))
+            cache.pop(random.choice(list(cache.keys())))
 
 
 constant_folder_simplifier_cache = {}
