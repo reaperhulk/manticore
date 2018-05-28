@@ -99,6 +99,9 @@ class Bool(Expression):
     def __eq__(self, other):
         return BoolEq(self, self.cast(other))
 
+    # In Python 3 if you define __eq__ the identity hash is removed.
+    __hash__ = object.__hash__
+
     def __ne__(self, other):
         return BoolNot(self == self.cast(other))
 
@@ -319,6 +322,9 @@ class BitVec(Expression):
     def __eq__(self, other):
         return Equal(self, self.cast(other))
 
+    # In Python 3 if you define __eq__ the identity hash is removed.
+    __hash__ = object.__hash__
+
     def __ne__(self, other):
         return BoolNot(Equal(self, self.cast(other)))
 
@@ -393,6 +399,9 @@ class BitVecConstant(BitVec, Constant):
         if self.taint:
             raise NotImplementedError()
         return self.value == other
+
+    # In Python 3 if you define __eq__ the identity hash is removed.
+    __hash__ = object.__hash__
 
 
 class BitVecOperation(BitVec, Operation):
@@ -616,6 +625,9 @@ class Array(Expression):
                     return BoolConstant(False)
             return cond
         return compare_buffers(self, other)
+
+    # In Python 3 if you define __eq__ the identity hash is removed.
+    __hash__ = object.__hash__
 
     @property
     def underlying_variable(self):
