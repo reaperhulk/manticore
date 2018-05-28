@@ -68,7 +68,7 @@ class Gdb(subprocess.Popen):
     def getM(self, m):
         try:
             return long(self.correspond('x/xg %s\n'%m).split("\t")[-1].split("0x")[-1].split("\n")[0],16)
-        except Exception,e:
+        except Exception as e:
             raise e
             return 0
     def get_pid(self):
@@ -145,7 +145,7 @@ STACK_INSTRUCTIONS = ['BOUND', 'CALL', 'CALLF', 'ENTER', 'INT', 'INT1', 'INTO', 
 while True:
     try:
         stepped = False
-        pc = gdb.getR({'i386': 'EIP', 'amd64': 'RIP'}[arch]) 
+        pc = gdb.getR({'i386': 'EIP', 'amd64': 'RIP'}[arch])
         SP = {'i386': 'ESP', 'amd64': 'RSP'}[arch]
         BP = {'i386': 'EBP', 'amd64': 'RBP'}[arch]
         DI = {'i386': 'EDI', 'amd64': 'RDI'}[arch]
@@ -157,8 +157,8 @@ while True:
         wordsize =  {'i386': 4, 'amd64': 8}[arch]
         text = ''.join([chr(gdb.getByte(pc+i)) for i in range(16)])
 
-        cap_arch = {'i386': CS_ARCH_X86, 'amd64': CS_ARCH_X86}[arch] 
-        cap_mode = {'i386': CS_MODE_32, 'amd64': CS_MODE_64}[arch] 
+        cap_arch = {'i386': CS_ARCH_X86, 'amd64': CS_ARCH_X86}[arch]
+        cap_mode = {'i386': CS_MODE_32, 'amd64': CS_MODE_64}[arch]
         md = Cs(cap_arch, cap_mode)
         md.detail = True
         md.syntax = 0
@@ -196,7 +196,7 @@ while True:
 
         if instruction.insn_name().upper() in ['PUSHF', 'PUSHFD']:
             registers['EFLAGS'] = gdb.getR('EFLAGS')
-            
+
         if instruction.insn_name().upper() in ['XLAT', 'XLATB']:
             registers['AL'] = gdb.getR('AL')
             registers[B] = gdb.getR(B)
@@ -220,7 +220,7 @@ while True:
                     address += o.mem.scale*registers[reg_name]
                 address = address&({'i386': 0xffffffff, 'amd64': 0xffffffffffffffff}[arch])
                 if instruction.operands[1].type == X86_OP_IMM:
-                    address += instruction.operands.value 
+                    address += instruction.operands.value
                 elif instruction.operands[1].type == X86_OP_REG:
                     reg_name = str(instruction.reg_name(o.reg).upper())
                     address + gdb.getR(reg_name)/8
@@ -268,35 +268,35 @@ while True:
                     X86_REG_AL: X86_REG_AX,
                     X86_REG_AX: X86_REG_EAX,
                     X86_REG_EAX: X86_REG_RAX,
-                    X86_REG_RAX: X86_REG_INVALID, 
+                    X86_REG_RAX: X86_REG_INVALID,
 
                     X86_REG_BH: X86_REG_BX,
                     X86_REG_BL: X86_REG_BX,
                     X86_REG_BX: X86_REG_EBX,
                     X86_REG_EBX: X86_REG_RBX,
-                    X86_REG_RBX: X86_REG_INVALID, 
+                    X86_REG_RBX: X86_REG_INVALID,
 
                     X86_REG_CH: X86_REG_CX,
                     X86_REG_CL: X86_REG_CX,
                     X86_REG_CX: X86_REG_ECX,
                     X86_REG_ECX: X86_REG_RCX,
-                    X86_REG_RCX: X86_REG_INVALID, 
+                    X86_REG_RCX: X86_REG_INVALID,
 
                     X86_REG_DH: X86_REG_DX,
                     X86_REG_DL: X86_REG_DX,
                     X86_REG_DX: X86_REG_EDX,
                     X86_REG_EDX: X86_REG_RDX,
-                    X86_REG_RDX: X86_REG_INVALID, 
+                    X86_REG_RDX: X86_REG_INVALID,
 
                     X86_REG_DIL: X86_REG_EDI,
                     X86_REG_DI: X86_REG_EDI,
                     X86_REG_EDI: X86_REG_RDI,
-                    X86_REG_RDI: X86_REG_INVALID, 
+                    X86_REG_RDI: X86_REG_INVALID,
 
                     X86_REG_SIL: X86_REG_ESI,
                     X86_REG_SI: X86_REG_ESI,
                     X86_REG_ESI: X86_REG_RSI,
-                    X86_REG_RSI: X86_REG_INVALID, 
+                    X86_REG_RSI: X86_REG_INVALID,
         }
         #There is a capstone branch that should fix all this annoyances .. soon
         #https://github.com/aquynh/capstone/tree/next
@@ -311,7 +311,7 @@ while True:
             reg_name = str(instruction.reg_name(ri).upper())
             registers[reg_name] = gdb.getR(reg_name)
 
-        #special case for flags...                
+        #special case for flags...
         if instruction.mnemonic.upper() in flags.keys():
             EFLAGS = gdb.getR('EFLAGS')
             for fl in flags[instruction.mnemonic.upper()]['tested']:
@@ -362,12 +362,12 @@ while True:
         # STEP !
         gdb.stepi()
         stepped = True
-       
+
         # gather POS info
         registers = dict(registers)
         memory = dict(memory)
 
-        #special case for flags...                
+        #special case for flags...
         if instruction.mnemonic.upper() in flags:
             for fl in flags[instruction.mnemonic.upper()]['tested']:
                 del registers[fl]
@@ -380,7 +380,7 @@ while True:
             registers[i] = gdb.getR(i)
 
 
-        #special case for flags...                
+        #special case for flags...
         EFLAGS = gdb.getR('EFLAGS')
         if instruction.mnemonic.upper() in flags:
             for fl in flags[instruction.mnemonic.upper()]['defined']:
@@ -389,7 +389,7 @@ while True:
                     del registers['OF']
                     continue
                 registers[fl] = (EFLAGS&flags_maks[fl]) != 0
- 
+
         #update memory
         for i in memory.keys():
             memory[i] = chr(gdb.getByte(i))
@@ -399,16 +399,16 @@ while True:
         test['pos']['registers'] = registers
 
         if not 'int' in groups:
-            print test 
+            print test
 
         count += 1
 
         #check if exit
         if instruction.insn_name().upper() in ['SYSCALL', 'INT', 'SYSENTER']:
             if "The program has no registers now." in gdb.correspond("info registers \n"):
-                print "done" 
+                print "done"
                 break
-    except Exception,e:
+    except Exception as e:
         if "The program has no registers now." in gdb.correspond("info registers\n"):
             break
         #print '-'*60

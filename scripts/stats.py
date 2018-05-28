@@ -39,7 +39,7 @@ for filename in saved_states:
                 db[pc] = db.setdefault(pc,0) + 1
                 edges.setdefault(lastpc,[]).append(pc)
                 lastpc=pc
-    except Exception,e:
+    except Exception as e:
         print "#Failed to load saved state %s (%s)"%(filename,e)
 
 if args.pcfreq :
@@ -73,7 +73,7 @@ elif args.bbs:
 
         def p(x):
             return isinstance(x, (int, long)) and hex(x) or x
-        
+
         print '%s -> [%s]'%(p(origin), ', '.join(map(p, targets)) )
-    
+
 

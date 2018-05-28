@@ -6,7 +6,7 @@ import subprocess
 from distorm3 import Decompose, Decode16Bits, Decode32Bits, Decode64Bits, Mnemonics, Registers
 
 count = 0
- 
+
 class Gdb(subprocess.Popen):
     def __init__(self, prg, prompt='(gdb) '):
         """Construct interactive Popen."""
@@ -51,7 +51,7 @@ class Gdb(subprocess.Popen):
     def getM(self, m):
         try:
             return long(self.correspond('x/xg %s\n'%m).split("\t")[-1].split("0x")[-1].split("\n")[0],16)
-        except Exception,e:
+        except Exception as e:
             print 'x/xg %s\n'%m
             print self.correspond('x/xg %s\n'%m)
             raise e
@@ -118,11 +118,11 @@ STACK_INSTRUCTIONS = ['BOUND', 'CALL', 'CALLF', 'ENTER', 'INT', 'INT1', 'INTO', 
 while True:
     try:
         stepped = False
-        pc = gdb.getR({'i386': 'EIP', 'amd64': 'RIP'}[arch]) 
+        pc = gdb.getR({'i386': 'EIP', 'amd64': 'RIP'}[arch])
         print hex(pc)
         gdb.stepi()
         print gdb.correspond('info registers\n')
-    except Exception,e:
+    except Exception as e:
         print e
 print "# Processed %d instructions." % count
 
